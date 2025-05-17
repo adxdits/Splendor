@@ -4,7 +4,7 @@ public enum GameColor {
     GREEN,
     WHITE,
     BLACK,
-    YELLOW,
+    YELLOW, //OR
     RED,
     BLUE
 }
