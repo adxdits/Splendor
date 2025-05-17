@@ -1,59 +1,39 @@
 package fr.uge.splendor;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
 
 public class CardStack implements Stack {
-    int totalAmount;
-    int cardLevel;
-    java.util.Stack<Card> cards;
+    private final List<Card> cards = new ArrayList<>();
 
-    public void TokenStack(int cardLevel){
-        if (cardLevel < 1 || cardLevel > 3) {
-            throw new IllegalArgumentException("Invalid level: " + cardLevel);
-        }
-        totalAmount = getAmountByLevel(cardLevel);
+    public CardStack() {
         initializeCards();
     }
 
-
     private void initializeCards() {
-        cards = new java.util.Stack<>();
-        for (GameColor color: GameColor.values()) {
-            if (color == GameColor.YELLOW) {
-                continue; // Skip yellow color
-            }
-            int nbTypes = GameColor.values().length - 1; // Exclude yellow
-            for (int i = 0; i < totalAmount/nbTypes; i++) {
-                int points = i%4; // no info on points
-                cards.add(new Card(cardLevel, color, points));
+        for (GameColor color : GameColor.values()) {
+            if (color == GameColor.YELLOW) continue;
+
+            Map<GameColor, Integer> cost = Collections.singletonMap(color, 3);
+
+            for (int i = 0; i < 8; i++) {
+                cards.add(new Card(1, color, 1, cost));
             }
         }
         Collections.shuffle(cards);
     }
 
-    private int getAmountByLevel(int cardLevel) {
-        switch (cardLevel) {
-            case 1 -> {
-                return 40;
-            }
-            case 2 -> {
-                return 30;
-            }
-            case 3 -> {
-                return 20;
-            }
-            default -> {
-                throw new IllegalArgumentException("Invalid level: " + cardLevel);
-            }
-        }
-    }
-
-
     @Override
     public Item takeOne() {
-        return cards.pop(); // if empty no yet implemented ?
+        if (cards.isEmpty()) {
+            throw new IllegalStateException("No cards left in the stack");
+        }
+        return cards.remove(cards.size() - 1);
+    }
+
+    public boolean isEmpty() {
+        return cards.isEmpty();
     }
 }
