@@ -104,4 +104,37 @@ public class Player {
     public String getName() {
         return name;
     }
+
+    public void showState() {
+        showPrestigePoints();
+        showAdvantages();
+        showTokens();
+
+    }
+
+    private void showTokens() {
+        StringBuilder sb = new StringBuilder("Jetons :{ ");
+        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
+            GameColor color = entry.getKey();
+            int quantity = entry.getValue();
+            sb.append(color.shortName()).append(":").append(quantity).append(" ");
+        }
+        sb.append("}");
+        System.out.println(sb);
+    }
+
+    private void showAdvantages() {
+        StringBuilder sb = new StringBuilder("Avantages :{ ");
+        for (Map.Entry<GameColor, Integer> entry : advantages.entrySet()) {
+            GameColor color = entry.getKey();
+            int quantity = entry.getValue();
+            if (color == GameColor.YELLOW) continue;
+            sb.append(color.shortName()).append(":").append(quantity).append(" ");
+        }
+        sb.append("}");
+    }
+
+    private void showPrestigePoints() {
+        System.out.println("PV: " + prestigePoints);
+    }
 }

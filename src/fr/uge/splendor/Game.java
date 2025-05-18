@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Game {
     private final List<Player> players = new ArrayList<>();
-    private final TokenStack tokenStack = new TokenStack();
+    private final List<TokenStack> tokenStack = new ArrayList<>();
     private final List<CardStack> cardStack;
     private final NobleStack nobleStack = new NobleStack();
     private final ArrayList<Noble> noblesShow = new ArrayList<>();
@@ -35,8 +35,20 @@ public class Game {
 
 
     private void prepareBoard() {
+        prepareTokens();
         prepareNobles();
         prepareCards();
+    }
+
+    private void prepareTokens() {
+        for (GameColor color : GameColor.values()) {
+            if (color == GameColor.YELLOW) {
+                tokenStack.add(new TokenStack(color, players.size()));
+            } else {
+                tokenStack.add(new TokenStack(color, players.size()));
+            }
+        }
+
     }
 
     private void prepareCards() {
@@ -56,13 +68,12 @@ public class Game {
         // Boucle de jeu principale
         while (!haveWinner()){
             int playerIndex = tourNumber % players.size();
-
             Player currentPlayer = players.get(playerIndex);
-            System.out.println("C'est le tour de " + currentPlayer.getName());
-
-
+            showState(currentPlayer);
 
             tourNumber++;
+            break;
+
         }
         announceWinner();
         /*while (!cardStack.isEmpty()) {
@@ -74,10 +85,20 @@ public class Game {
         announceWinner();*/
     }
 
+    private void showState(Player player) {
+
+        System.out.println("C'est le tour de " + player.getName());
+        showBoard();
+        System.out.println();
+        System.out.println("État du joueur :");
+        player.showState();
+
+    }
+
     private void executeTurn(Player player) {
         // Prendre 2 jetons de même couleur
         if (!tokenStack.isEmpty()) {
-            Token token = (Token) tokenStack.takeOne();
+            Token token = (Token) tokenStack.get(0).takeOne();
             player.addTokens(token.color(), 2);
         }
 
@@ -91,16 +112,38 @@ public class Game {
     }
 
     private void showBoard() {
-        System.out.println("Nobles : ");
-        for (Noble noble : noblesShow) {
-            System.out.println(noble);
-        }
-        System.out.println("Cartes : ");
-        for (ArrayList<Card> cards : cardsShow) {
+        showNobles();
+        ShowCards();
+        showTokens();
+    }
+
+    private void ShowCards() {
+        cardsShow.forEach(cards -> {
+            System.out.print("Niveau " + (cards.get(0).level())+ " : ");
+            StringJoiner joiner = new StringJoiner("\t");
             for (Card card : cards) {
-                System.out.println(card);
+                joiner.add(card.toString());
             }
+            System.out.println(joiner);
+        });
+    }
+
+    private void showNobles() {
+        System.out.print("Nobles : ");
+        StringJoiner joiner = new StringJoiner("\t");
+        for (Noble noble : noblesShow) {
+            joiner.add(noble.toString());
         }
+        System.out.println(joiner);
+    }
+
+    private void showTokens() {
+        System.out.print("Jetons : ");
+        StringJoiner joiner = new StringJoiner("\t");
+        for (TokenStack tokenStack : tokenStack) {
+            joiner.add(tokenStack.toString());
+        }
+        System.out.println(joiner);
     }
 
     private boolean haveWinner(){

@@ -9,12 +9,16 @@ public class NobleStack implements Stack {
 
     public NobleStack() {
         this.stack = new java.util.Stack<>();
+        stack.addAll(getNobles());
         Collections.shuffle(stack);
     }
 
     @Override
     public Item takeOne() {
-        return null;
+        if (stack.isEmpty()) {
+            throw new IllegalStateException("No nobles left in the stack");
+        }
+        return stack.pop();
     }
 
     private List<Noble> getNobles() {

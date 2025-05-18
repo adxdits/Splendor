@@ -18,7 +18,7 @@ public record Noble(
     @Override
     public String toString() {
         String costString = cost.entrySet().stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .map(entry -> entry.getKey().shortName() + ":" + entry.getValue())
                 .reduce("(", (a, b) -> a + " " + b) + " )";
         return "{ PV:" + prestigePoints + " | Cost:" + costString + " }";
     }

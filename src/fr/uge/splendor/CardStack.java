@@ -22,8 +22,6 @@ public class CardStack implements Stack {
     public CardStack(int level) {
         cards.addAll(all_cards.get(level));
         Collections.shuffle(cards);
-        System.out.println("size :"+cards.size());
-
     }
 
 
