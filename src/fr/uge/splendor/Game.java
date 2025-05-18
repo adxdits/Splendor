@@ -5,7 +5,7 @@ public class Game {
     private final List<Player> players = new ArrayList<>();
     private final TokenStack tokenStack = new TokenStack();
     private final List<CardStack> cardStack;
-    private final CardStack nobleStack = new CardStack(0);
+    private final NobleStack nobleStack = new NobleStack();
 
     public Game(int numPlayers) {
         CardStack.loadCardFromCSV();
@@ -15,8 +15,6 @@ public class Game {
             players.add(new Player());
         }
 
-    //players.add(new Player());
-        //players.add(new Player());
     }
 
     public void play() {
