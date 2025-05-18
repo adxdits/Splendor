@@ -3,14 +3,20 @@ import java.util.*;
 
 public class Game {
     private final List<Player> players = new ArrayList<>();
-    private final TokenStack tokenStack;
-    private final CardStack cardStack;
+    private final TokenStack tokenStack = new TokenStack();
+    private final List<CardStack> cardStack;
+    private final CardStack nobleStack = new CardStack(0);
 
-    public Game() {
-        this.tokenStack = new TokenStack();
-        this.cardStack = new CardStack();
-        players.add(new Player());
-        players.add(new Player());
+    public Game(int numPlayers) {
+        CardStack.loadCardFromCSV();
+        cardStack = List.of(new CardStack(1),new CardStack(2),new CardStack(3));
+
+        for (int i = 0; i < numPlayers; i++) {
+            players.add(new Player());
+        }
+
+    //players.add(new Player());
+        //players.add(new Player());
     }
 
     public void play() {
@@ -32,7 +38,7 @@ public class Game {
 
         // Acheter une carte si possible
         if (!cardStack.isEmpty()) {
-            Card card = (Card) cardStack.takeOne();
+            Card card = (Card) cardStack.get(0).takeOne();
             if (player.canBuy(card)) {
                 player.addCard(card);
             }
