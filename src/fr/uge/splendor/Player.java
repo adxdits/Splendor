@@ -8,6 +8,8 @@ public class Player {
     private final ArrayList<Card> borrowedCards = new ArrayList<>();
 
     private final List<Card> cards = new ArrayList<>();
+    private final List<Noble> nobles = new ArrayList<>();
+
     private int prestigePoints;
 
     public Player() {
@@ -63,7 +65,7 @@ public class Player {
         advantages.merge(card.color(), 1, Integer::sum);
     }
 
-    public boolean canBuy(Card card) {
+    public boolean canBuyCard(Card card) {
         int diff = 0;
         for (Map.Entry<GameColor, Integer> entry : card.cost().entrySet()) {
             GameColor color = entry.getKey();
@@ -77,6 +79,22 @@ public class Player {
         return tokens.getOrDefault(GameColor.YELLOW, 0) >= diff;
     }
 
+    public boolean canGetNoble(Noble noble){
+        for (Map.Entry<GameColor, Integer> entry : noble.cost().entrySet()) {
+            GameColor color = entry.getKey();
+            int cost = entry.getValue();
+            int currentColorAdvantage = advantages.getOrDefault(color, 0);
+            if (cost > currentColorAdvantage) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void takeNoble(Noble noble){
+        nobles.add(noble);
+        prestigePoints += noble.prestigePoints();
+    }
 
 
     public int getPrestigePoints() {
