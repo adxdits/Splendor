@@ -38,7 +38,7 @@ public class Game {
         if (!cardStack.isEmpty()) {
             Card card = (Card) cardStack.get(0).takeOne();
             if (player.canBuy(card)) {
-                player.addCard(card);
+                player.buyCard(card);
             }
         }
     }
