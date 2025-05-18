@@ -6,15 +6,15 @@ public class Player {
     private final EnumMap<GameColor, Integer> tokens = new EnumMap<>(GameColor.class);
     private final EnumMap<GameColor, Integer> advantages = new EnumMap<>(GameColor.class);
     private final ArrayList<Card> borrowedCards = new ArrayList<>();
-
     private final List<Card> cards = new ArrayList<>();
     private final List<Noble> nobles = new ArrayList<>();
-
     private int prestigePoints;
+    private final String name;
 
-    public Player() {
+    public Player(int playerNumber) {
         Arrays.stream(GameColor.values())
                 .forEach(color -> tokens.put(color, 0));
+        name = "Player " + playerNumber;
     }
 
 
@@ -99,5 +99,9 @@ public class Player {
 
     public int getPrestigePoints() {
         return prestigePoints;
+    }
+
+    public String getName() {
+        return name;
     }
 }

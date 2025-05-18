@@ -21,4 +21,12 @@ public record Card(
         Objects.requireNonNull(color);
 
     }
+
+    @Override
+    public String toString() {
+        String costString = cost.entrySet().stream()
+                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .reduce("(", (a, b) -> a + " " + b) + " )";
+        return "{ Lv:" + level + " | Col:" + color + " | PV:" + prestigePoints + " | Cost:" + costString + " }";
+    }
 }
