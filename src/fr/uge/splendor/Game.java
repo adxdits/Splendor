@@ -65,8 +65,9 @@ public class Game {
             Player currentPlayer = players.get(playerIndex);
             showState(currentPlayer);
 
-
             allNobleTryToVisitAllPlayer();
+            refillCardsShowed();
+            executeTurn(currentPlayer);
 
             tourNumber++;
             break;
@@ -84,6 +85,8 @@ public class Game {
 
 
     private void executeTurn(Player player) {
+        askPlayerAction(player);
+        /*
         // Prendre 2 jetons de même couleur
         if (!tokenStack.isEmpty()) {
             Token token = (Token) tokenStack.get(0).takeOne();
@@ -96,7 +99,7 @@ public class Game {
             if (player.canBuyCard(card)) {
                 player.buyCard(card);
             }
-        }
+        }*/
     }
 
     private void showState(Player player) {
@@ -198,7 +201,90 @@ public class Game {
                 }
             }
         }
+    }
+
+    private void askPlayerAction(Player player) {
+        // Demander à chaque joueur de choisir une action
+        while (true) {
+            System.out.println(player.getName() + ", choisissez une action :");
+            System.out.println("1. Prendre des jetons");
+            System.out.println("2. Acheter une carte");
+            System.out.println("3. Réserver une carte");
+
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+            switch (choice) {
+                case 1 -> {
+                    askPlayerTakeTokens(player);
+                }
+                case 2 -> {
+                    askPlayerBuyCard(player);
+                }
+                case 3 -> {
+                    askPlayerReserveCard(player);
+                }
+                default -> {
+                    System.out.println("Choix invalide.");
+                    continue;
+                }
+            }
+            break;
+        }
+    }
+
+    private void askPlayerReserveCard(Player player) {
+    }
+
+    private void askPlayerBuyCard(Player player) {
+    }
+
+    private void askPlayerTakeTokens(Player player) {
+        System.out.println("Choisissez les jetons à prendre :");
+        HashMap<GameColor, Integer> tmpTokens = new HashMap<>();
+        var listTokenCanBeTaken = tokenStack.keySet().stream().filter(color -> color!= GameColor.YELLOW).toList();
+
+        Scanner scanner = new Scanner(System.in);
+        while (true){
+            for (int i = 0; i < listTokenCanBeTaken.size() ; i++) {
+                GameColor color = listTokenCanBeTaken.get(i);
+                System.out.println(i + " = " + color + " : " + tokenStack.get(color).remainingTokens());
+            }
+            int tokenTake = tmpTokens.values().stream().reduce(0, Integer::sum);
+            boolean twoSameColor = tmpTokens.values().stream().anyMatch(v -> v == 2);
+            if (tokenTake == 3 || twoSameColor){
+                break;
+            }
+
+            System.out.println("Choisissez l'index de la couleur du jeton :");
+            int colorIndex = scanner.nextInt();
+            if (colorIndex < 0 || colorIndex >= listTokenCanBeTaken.size()) {
+                System.out.println("Index invalide. Veuillez réessayer.");
+                continue;
+            }
+            GameColor color = listTokenCanBeTaken.get(colorIndex);
+            if (tokenStack.get(color).remainingTokens() <= 0) {
+                System.out.println("Pas de jetons disponibles de cette couleur.");
+                continue;
+            }
+            if(tmpTokens.getOrDefault(color, 0) == 1 && tokenTake == 2){
+                System.out.println("Vous ne pouvez pas prendre 2 jetons de la même couleur.");
+                continue;
+            }
+            tmpTokens.merge(color, 1, Integer::sum);
+            tokenStack.get(color).takeOne();
+            player.addTokens(color, 1);
+
+
+        }
+        System.out.println("Vous avez pris : " + tmpTokens);
+
+
+
+
+
+
 
     }
+
 
 }

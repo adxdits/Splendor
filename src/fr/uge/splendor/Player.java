@@ -17,8 +17,6 @@ public class Player {
         name = "Player " + playerNumber;
     }
 
-
-
     public void addTokens(GameColor color, int quantity) {
         tokens.merge(color, quantity, Integer::sum);
     }
