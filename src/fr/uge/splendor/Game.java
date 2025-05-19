@@ -386,10 +386,11 @@ public class Game {
 
         Scanner scanner = new Scanner(System.in);
         while (true){
-            System.out.println("Jetons disponibles : ");
+            System.out.println("Jetons disponibles (jeton pris) : ");
             for (int i = 0; i < listTokenCanBeTaken.size() ; i++) {
                 GameColor color = listTokenCanBeTaken.get(i);
-                String text = i + " = " + color + " : " + tokenStack.get(color).remainingTokens();
+                int tmpToken = tmpTokens.getOrDefault(color, 0);
+                String text = i + " = " + color + " : " + tokenStack.get(color).remainingTokens() + " (pris : " + tmpToken + ")\t";
                 System.out.println(TerminalTools.interactiveText(text));
             }
             int tokenTake = tmpTokens.values().stream().reduce(0, Integer::sum);
@@ -415,7 +416,8 @@ public class Game {
                 continue;
             }
             GameColor color = listTokenCanBeTaken.get(colorIndex);
-            if (tokenStack.get(color).remainingTokens() <= 0) {
+            int tokenTakeByColor = tmpTokens.getOrDefault(color, 0);
+            if (tokenStack.get(color).remainingTokens() - tokenTakeByColor <= 0) {
                 System.out.println(TerminalTools.warningText("Pas de jetons disponibles de cette couleur."));
                 continue;
             }
@@ -424,11 +426,14 @@ public class Game {
                 continue;
             }
             tmpTokens.merge(color, 1, Integer::sum);
-            tokenStack.get(color).takeOne();
-            player.addTokens(color, 1);
-
-
         }
+        for (Map.Entry<GameColor, Integer> entry : tmpTokens.entrySet()) {
+            GameColor color = entry.getKey();
+            int quantity = entry.getValue();
+            player.addTokens(color, quantity);
+            tokenStack.get(color).takeOne();
+        }
+
         System.out.println(TerminalTools.confirmText("Vous avez pris : " + tmpTokens));
         return true;
     }
