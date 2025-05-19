@@ -70,7 +70,7 @@ public class Game {
             executeTurn(currentPlayer);
 
             tourNumber++;
-            break;
+            //break;
 
         }
         announceWinner();
@@ -215,13 +215,21 @@ public class Game {
             int choice = scanner.nextInt();
             switch (choice) {
                 case 1 -> {
-                    askPlayerTakeTokens(player);
+                    if (!askPlayerTakeTokens(player)){
+                        continue;
+                    }
                 }
                 case 2 -> {
-                    askPlayerBuyCard(player);
+                    if(!askPlayerBuyCard(player)){
+                        continue;
+                    }
+                    refillCardsShowed();
                 }
                 case 3 -> {
-                    askPlayerReserveCard(player);
+                    if (!askPlayerReserveCard(player)){
+                        continue;
+                    }
+                    refillCardsShowed();
                 }
                 default -> {
                     System.out.println("Choix invalide.");
@@ -232,13 +240,52 @@ public class Game {
         }
     }
 
-    private void askPlayerReserveCard(Player player) {
+    private boolean askPlayerReserveCard(Player player) {
+        if (!player.canBorrowCard()){
+            System.out.println("Vous ne pouvez pas réserver de carte. Vous avez déjà 3 cartes réservées.");
+            return false;
+        }
+        while (true){
+            for (int i = 0; i < cardsShow.size(); i++) {
+                for (int j = 0; j < cardsShow.get(i).size(); j++) {
+                    if (cardsShow.get(i).get(j) == null) {
+                        continue;
+                    }
+                    int index = i * 4 + j;
+                    System.out.print(index + " = " + cardsShow.get(i).get(j) + "\t");
+                }
+                System.out.println();
+            }
+            System.out.println("Choisissez une carte à réserver : (-1 pour annuler)");
+            Scanner scanner = new Scanner(System.in);
+            int cardIndex = scanner.nextInt();
+            if (cardIndex == -1) {
+                return false;
+            }
+            int columnIndex = cardIndex / 4;
+            int rowIndex = cardIndex % 4;
+            if (columnIndex < 0 || columnIndex >= cardsShow.size() || rowIndex < 0 || rowIndex >= cardsShow.get(columnIndex).size()) {
+                System.out.println("Index invalide. Veuillez réessayer.");
+                continue;
+            }
+            Card card = cardsShow.get(columnIndex).get(rowIndex);
+            if (card == null) {
+                System.out.println("Pas de carte disponible à cette position.");
+                continue;
+            }
+            player.borrowCard(card);
+            cardsShow.get(columnIndex).set(rowIndex, null);
+            System.out.println("Vous avez réservé la carte : " + card);
+            return true;
+        }
     }
 
-    private void askPlayerBuyCard(Player player) {
+    private boolean askPlayerBuyCard(Player player) {
+        //System.out.println("Choisissez une carte à acheter :");
+
     }
 
-    private void askPlayerTakeTokens(Player player) {
+    private boolean askPlayerTakeTokens(Player player) {
         System.out.println("Choisissez les jetons à prendre :");
         HashMap<GameColor, Integer> tmpTokens = new HashMap<>();
         var listTokenCanBeTaken = tokenStack.keySet().stream().filter(color -> color!= GameColor.YELLOW).toList();
@@ -277,13 +324,7 @@ public class Game {
 
         }
         System.out.println("Vous avez pris : " + tmpTokens);
-
-
-
-
-
-
-
+        return true;
     }
 
 
