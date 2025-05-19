@@ -18,4 +18,9 @@ public class TerminalTools {
     public static String confirmText(String text) {
         return "\u001B[32m" + text + "\u001B[0m";
     }
+
+    //return a string with the color of error text (red)
+    public static String errorText(String text) {   // in theory, never used
+        return "\u001B[31m" + text + "\u001B[0m";
+    }
 }

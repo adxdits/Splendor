@@ -251,6 +251,7 @@ public class Game {
             return false;
         }
         while (true){
+            System.out.println("Cartes disponibles : ");
             for (int i = 0; i < cardsShow.size(); i++) {
                 for (int j = 0; j < cardsShow.get(i).size(); j++) {
                     if (cardsShow.get(i).get(j) == null) {
@@ -299,6 +300,7 @@ public class Game {
     private boolean askPlayerBuyCard(Player player) {
         while (true){
             int index = 0;
+            System.out.println("Cartes disponibles : ");
             for (int i = 0; i < cardsShow.size(); i++) {
                 for (int j = 0; j < cardsShow.get(i).size(); j++) {
                     if (cardsShow.get(i).get(j) == null) {
@@ -378,12 +380,13 @@ public class Game {
     }
 
     private boolean askPlayerTakeTokens(Player player) {
-        System.out.println(TerminalTools.askText("Choisissez les jetons à prendre :"));
+        System.out.println(TerminalTools.askText("Choisissez les jetons à prendre : (-1 pour annuler)"));
         HashMap<GameColor, Integer> tmpTokens = new HashMap<>();
         var listTokenCanBeTaken = tokenStack.keySet().stream().filter(color -> color!= GameColor.YELLOW).toList();
 
         Scanner scanner = new Scanner(System.in);
         while (true){
+            System.out.println("Jetons disponibles : ");
             for (int i = 0; i < listTokenCanBeTaken.size() ; i++) {
                 GameColor color = listTokenCanBeTaken.get(i);
                 String text = i + " = " + color + " : " + tokenStack.get(color).remainingTokens();
@@ -403,6 +406,9 @@ public class Game {
             } catch (NumberFormatException e) {
                 System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
                 continue;
+            }
+            if (colorIndex == -1) {
+                return false;
             }
             if (colorIndex < 0 || colorIndex >= listTokenCanBeTaken.size()) {
                 System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));

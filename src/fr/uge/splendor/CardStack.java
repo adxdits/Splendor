@@ -14,7 +14,7 @@ public class CardStack implements Stack {
             Path path = Path.of("cards_list.csv");
             all_cards = Tools.LoadingCardsOnCSV(path).stream().collect(Collectors.groupingBy(Card::level,Collectors.toList()));
         } catch (IOException e) {
-            System.err.println("Error loading cards: " + e.getMessage());
+            System.err.println(TerminalTools.errorText("Error loading cards: " + e.getMessage()));
             throw new RuntimeException("Failed to load cards from CSV", e);
         }
     }
