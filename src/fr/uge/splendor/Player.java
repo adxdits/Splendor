@@ -23,8 +23,9 @@ public class Player {
         tokens.merge(color, quantity, Integer::sum);
     }
 
-    private void removeTokens(Map<GameColor,Integer> tokensToRemove){
-        int goldTokenUsed = 0;
+    private Map<GameColor,Integer> removeTokens(Map<GameColor,Integer> tokensToRemove){
+        Map<GameColor, Integer> removedTokens = new HashMap<>();
+        int yellowTokenUsed = 0;
         for (Map.Entry<GameColor, Integer> entry : tokensToRemove.entrySet()) {
             GameColor color = entry.getKey();
             int cost = entry.getValue();
@@ -32,19 +33,25 @@ public class Player {
             int bonus = advantages.getOrDefault(color, 0);
 
             if (cost > currentTokens + bonus){
-                goldTokenUsed += cost - currentTokens - bonus;
+
+                yellowTokenUsed += cost - currentTokens - bonus;
                 tokens.put(color, 0);
+                removedTokens.put(color, currentTokens);
             }
             else {
+                removedTokens.put(color, cost);
                 tokens.put(color, currentTokens + bonus - cost);
             }
 
         }
         int gold = tokens.getOrDefault(GameColor.YELLOW, 0);
-        if (gold < goldTokenUsed) {
+        if (gold < yellowTokenUsed) {
             throw new IllegalStateException("Not enough gold tokens to buy the card");
         }
-        tokens.put(GameColor.YELLOW, gold - goldTokenUsed);
+        tokens.put(GameColor.YELLOW, gold - yellowTokenUsed);
+        removedTokens.put(GameColor.YELLOW, yellowTokenUsed);
+
+        return removedTokens;
     }
 
     public boolean canBorrowCard(){
@@ -58,11 +65,12 @@ public class Player {
         borrowedCards.add(card);
     }
 
-    public void buyCard(Card card) {
-        removeTokens(card.cost());
+    public Map<GameColor, Integer> buyCard(Card card) {
+        Map<GameColor,Integer> removedTokens = removeTokens(card.cost());
         prestigePoints += card.prestigePoints();
         cards.add(card);
         advantages.merge(card.color(), 1, Integer::sum);
+        return removedTokens;
     }
 
     public boolean canBuyCard(Card card) {
@@ -106,7 +114,6 @@ public class Player {
     }
 
     public void showState() {
-        showPrestigePoints();
         showAdvantages();
         showTokens();
 
@@ -134,7 +141,4 @@ public class Player {
         sb.append("}");
     }
 
-    private void showPrestigePoints() {
-        System.out.println("PV: " + prestigePoints);
-    }
 }

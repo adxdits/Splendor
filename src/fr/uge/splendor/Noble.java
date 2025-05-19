@@ -20,6 +20,6 @@ public record Noble(
         String costString = cost.entrySet().stream()
                 .map(entry -> entry.getKey().shortName() + ":" + entry.getValue())
                 .reduce("(", (a, b) -> a + " " + b) + " )";
-        return "{ PV:" + prestigePoints + " | Cost:" + costString + " }";
+        return "{ PT:" + prestigePoints + " | Cout:" + costString + " }";
     }
 }

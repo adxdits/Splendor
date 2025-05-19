@@ -9,16 +9,18 @@ import java.util.Objects;
 public class TokenStack implements Stack {
     private int tokens;
     private final GameColor color;
+    private final int maximumTokens;
 
 
     public TokenStack(GameColor color, int nbPlayer) {
         Objects.requireNonNull(color);
         tokens = tokensByPlayer(color, nbPlayer);
         this.color = color;
+        this.maximumTokens = tokens;
     }
 
     private int tokensByPlayer(GameColor color, int nbPlayer) {
-        int tokens = 0;
+        int tokens;
         if (color == GameColor.YELLOW) {
             tokens = 5;
         }else {
@@ -32,6 +34,12 @@ public class TokenStack implements Stack {
         return tokens;
     }
 
+    public void refill(int nbToken){
+        if (nbToken < 0) {
+            throw new IllegalArgumentException("Number of tokens to refill cannot be negative");
+        }
+        tokens += nbToken;
+    }
 
     @Override
     public Item takeOne() {

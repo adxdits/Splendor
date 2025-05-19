@@ -3,12 +3,13 @@ import java.util.*;
 
 public class Game {
     private final List<Player> players = new ArrayList<>();
-    private final List<TokenStack> tokenStack = new ArrayList<>();
+    private final Map<GameColor,TokenStack> tokenStack = new HashMap<>();
     private final List<CardStack> cardStack;
     private final NobleStack nobleStack = new NobleStack();
     private final ArrayList<Noble> noblesShow = new ArrayList<>();
     private final ArrayList<ArrayList<Card>> cardsShow = new ArrayList<>();
     private int tourNumber = 0;
+
 
     public Game(int numPlayers) {
         CardStack.loadCardFromCSV();
@@ -41,14 +42,7 @@ public class Game {
     }
 
     private void prepareTokens() {
-        for (GameColor color : GameColor.values()) {
-            if (color == GameColor.YELLOW) {
-                tokenStack.add(new TokenStack(color, players.size()));
-            } else {
-                tokenStack.add(new TokenStack(color, players.size()));
-            }
-        }
-
+        Arrays.stream(GameColor.values()).forEach(color -> tokenStack.put(color, new TokenStack(color, players.size())));
     }
 
     private void prepareCards() {
@@ -85,15 +79,6 @@ public class Game {
         announceWinner();*/
     }
 
-    private void showState(Player player) {
-
-        System.out.println("C'est le tour de " + player.getName());
-        showBoard();
-        System.out.println();
-        System.out.println("État du joueur :");
-        player.showState();
-
-    }
 
     private void executeTurn(Player player) {
         // Prendre 2 jetons de même couleur
@@ -111,13 +96,31 @@ public class Game {
         }
     }
 
-    private void showBoard() {
-        showNobles();
-        ShowCards();
-        showTokens();
+    private void showState(Player player) {
+        System.out.println("C'est le tour de " + player.getName());
+        showBoard();
+        System.out.println();
+        System.out.println("État du joueur :");
+        player.showState();
     }
 
-    private void ShowCards() {
+    private void showBoard() {
+        showNobles();
+        showCards();
+        showTokens();
+        showScore();
+    }
+
+    private void showScore() {
+        System.out.print("Scores : ");
+        StringJoiner joiner = new StringJoiner("\t");
+        for (Player player : players) {
+            joiner.add(player.getName() + ": " + player.getPrestigePoints() + "PT");
+        }
+        System.out.println(joiner);
+    }
+
+    private void showCards() {
         cardsShow.forEach(cards -> {
             System.out.print("Niveau " + (cards.get(0).level())+ " : ");
             StringJoiner joiner = new StringJoiner("\t");
@@ -140,7 +143,7 @@ public class Game {
     private void showTokens() {
         System.out.print("Jetons : ");
         StringJoiner joiner = new StringJoiner("\t");
-        for (TokenStack tokenStack : tokenStack) {
+        for (TokenStack tokenStack : tokenStack.values()) {
             joiner.add(tokenStack.toString());
         }
         System.out.println(joiner);
@@ -154,5 +157,34 @@ public class Game {
         players.stream()
                 .max(Comparator.comparingInt(Player::getPrestigePoints))
                 .ifPresent(winner -> System.out.println("Le gagnant est " + winner.getName() + " avec " + winner.getPrestigePoints() + " points de prestige !"));
+    }
+
+    private void refillCardsShowed(){
+        for (int i = 0; i < cardsShow.size(); i++) { // we need i for know which level we need
+            ArrayList<Card> cards = cardsShow.get(i);
+            for (int j = 0; j < cards.size(); j++) {
+                if (cards.get(j) == null) {
+                    Card card = (Card) cardStack.get(i).takeOne();
+                    cards.set(j, card);
+                }
+            }
+        }
+    }
+
+    private void refillTokenStack(Map<GameColor, Integer> tokens){
+        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
+            GameColor color = entry.getKey();
+            int quantity = entry.getValue();
+            tokenStack.computeIfPresent(color, (k, v) -> {
+                v.refill(quantity);
+                return v;
+            });
+        }
+
+    }
+
+
+    private void playerTakeCard(Player player, Card card){
+
     }
 }

@@ -27,6 +27,6 @@ public record Card(
         String costString = cost.entrySet().stream()
                 .map(entry -> entry.getKey().shortName() + ":" + entry.getValue())
                 .reduce("(", (a, b) -> a + " " + b) + " )";
-        return "{ Lv:" + level + " | Col:" + color + " | PV:" + prestigePoints + " | Cost:" + costString + " }";
+        return "{ Coul:" + color + " | PT:" + prestigePoints + " | Cout :" + costString + " }";
     }
 }
