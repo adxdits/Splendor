@@ -13,7 +13,7 @@ public class Player {
 
     public Player(int playerNumber) {
         Arrays.stream(GameColor.values())
-                .forEach(color -> tokens.put(color, 0));
+                .forEach(color -> tokens.put(color, 2));
         name = "Player " + playerNumber;
     }
 

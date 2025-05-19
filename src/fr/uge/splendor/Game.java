@@ -188,9 +188,7 @@ public class Game {
         }
 
     }
-    private void playerTakeCard(Player player, Card card){
 
-    }
     private void allNobleTryToVisitAllPlayer(){
         for (Player player : players) {
             for (Noble noble : noblesShow) {
@@ -212,7 +210,14 @@ public class Game {
             System.out.println("3. Réserver une carte");
 
             Scanner scanner = new Scanner(System.in);
-            int choice = scanner.nextInt();
+            String choiceStr = scanner.next();
+            int choice;
+            try {
+                choice = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Choix invalide. Veuillez entrer un nombre.");
+                continue;
+            }
             switch (choice) {
                 case 1 -> {
                     if (!askPlayerTakeTokens(player)){
@@ -258,7 +263,14 @@ public class Game {
             }
             System.out.println("Choisissez une carte à réserver : (-1 pour annuler)");
             Scanner scanner = new Scanner(System.in);
-            int cardIndex = scanner.nextInt();
+            String choiceStr = scanner.next();
+            int cardIndex;
+            try {
+                cardIndex = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Choix invalide. Veuillez entrer un nombre.");
+                continue;
+            }
             if (cardIndex == -1) {
                 return false;
             }
@@ -274,14 +286,93 @@ public class Game {
                 continue;
             }
             player.borrowCard(card);
+            player.addTokens(GameColor.YELLOW, 1);
+            tokenStack.get(GameColor.YELLOW).takeOne();
             cardsShow.get(columnIndex).set(rowIndex, null);
+
             System.out.println("Vous avez réservé la carte : " + card);
             return true;
         }
     }
 
     private boolean askPlayerBuyCard(Player player) {
-        //System.out.println("Choisissez une carte à acheter :");
+        while (true){
+            int index = 0;
+            for (int i = 0; i < cardsShow.size(); i++) {
+                for (int j = 0; j < cardsShow.get(i).size(); j++) {
+                    if (cardsShow.get(i).get(j) == null) {
+                        continue;
+                    }
+                    index = i * 4 + j;
+                    System.out.print(index + " = " + cardsShow.get(i).get(j) + "\t");
+                }
+                System.out.println();
+            }
+            //show cards borrowed by the player for he can buy them
+            System.out.println("Cartes réservées : ");
+            List<Card> borrowedCards = player.getBorrowedCards();
+            for (Card card : borrowedCards) {
+                index++;
+                System.out.print(index + " = " + card + "\t");
+            }
+            System.out.println();
+            System.out.println("Choisissez une carte à acheter : (-1 pour annuler)");
+            Scanner scanner = new Scanner(System.in);
+            String choiceStr = scanner.next();
+            int cardIndex;
+            try {
+                cardIndex = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Choix invalide. Veuillez entrer un nombre.");
+                continue;
+            }
+            if (cardIndex == -1) {
+                return false;
+            }
+            if (cardIndex >= cardsShow.size() * cardsShow.getFirst().size()){
+                //search in the borrowed cards
+                System.out.println("Vous avez choisi d'acheter une carte réservée.");
+                int borrowedCardIndex = cardIndex - cardsShow.size() * cardsShow.getFirst().size();
+                if (borrowedCardIndex < 0 || borrowedCardIndex >= borrowedCards.size()) {
+                    System.out.println("Index invalide. Veuillez réessayer.");
+                    continue;
+                }
+                Card card = borrowedCards.get(borrowedCardIndex);
+                if (card == null) {
+                    System.out.println("Pas de carte disponible à cette position.");
+                    continue;
+                }
+                if (player.canBuyCard(card)) {
+                    Map<GameColor, Integer> removedTokens = player.buyCard(card);
+                    System.out.println("Vous avez acheté la carte : " + card);
+                    refillTokenStack(removedTokens);
+                    return true;
+                } else {
+                    System.out.println("Vous ne pouvez pas acheter cette carte.");
+                }
+            }
+            int columnIndex = cardIndex / 4;
+            int rowIndex = cardIndex % 4;
+            if (columnIndex < 0 || columnIndex >= cardsShow.size() || rowIndex < 0 || rowIndex >= cardsShow.get(columnIndex).size()) {
+                System.out.println("Index invalide. Veuillez réessayer.");
+                continue;
+            }
+            Card card = cardsShow.get(columnIndex).get(rowIndex);
+            if (card == null) {
+                System.out.println("Pas de carte disponible à cette position.");
+                continue;
+            }
+            if (player.canBuyCard(card)) {
+                Map<GameColor, Integer> removedTokens = player.buyCard(card);
+                System.out.println("Vous avez acheté la carte : " + card);
+                refillTokenStack(removedTokens);
+                cardsShow.get(columnIndex).set(rowIndex, null);
+                return true;
+            } else {
+                System.out.println("Vous ne pouvez pas acheter cette carte.");
+            }
+        }
+
 
     }
 
@@ -303,7 +394,14 @@ public class Game {
             }
 
             System.out.println("Choisissez l'index de la couleur du jeton :");
-            int colorIndex = scanner.nextInt();
+            String choiceStr = scanner.next();
+            int colorIndex;
+            try {
+                colorIndex = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Choix invalide. Veuillez entrer un nombre.");
+                continue;
+            }
             if (colorIndex < 0 || colorIndex >= listTokenCanBeTaken.size()) {
                 System.out.println("Index invalide. Veuillez réessayer.");
                 continue;
