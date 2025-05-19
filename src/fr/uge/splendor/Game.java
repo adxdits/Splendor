@@ -65,6 +65,9 @@ public class Game {
             Player currentPlayer = players.get(playerIndex);
             showState(currentPlayer);
 
+
+            allNobleTryToVisitAllPlayer();
+
             tourNumber++;
             break;
 
@@ -182,9 +185,20 @@ public class Game {
         }
 
     }
-
-
     private void playerTakeCard(Player player, Card card){
 
     }
+    private void allNobleTryToVisitAllPlayer(){
+        for (Player player : players) {
+            for (Noble noble : noblesShow) {
+                if (player.canGetNoble(noble)) {
+                    player.takeNoble(noble);
+                    noblesShow.remove(noble);
+                    break;
+                }
+            }
+        }
+
+    }
+
 }
