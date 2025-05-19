@@ -117,6 +117,17 @@ public class Player {
 
     }
 
+    private void showBorrowedCards() {
+        StringJoiner joiner = new StringJoiner("\t");
+        joiner.add("Cartes Empruntées :");
+        if (!borrowedCards.isEmpty()){
+            for (Card card : borrowedCards) {
+                joiner.add(card.toString());
+            }
+        }
+        System.out.println(joiner);
+    }
+
     private void showTokens() {
         StringBuilder sb = new StringBuilder("Jetons (Bonus) :{ ");
         for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
