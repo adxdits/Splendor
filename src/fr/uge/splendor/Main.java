@@ -7,9 +7,9 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         int numPlayers;
         do {
-            System.out.print("Combien de joueurs ? (2-4) : ");
+            System.out.print(TerminalTools.askText("Combien de joueurs ? (2-4) : "));
             while (!scanner.hasNextInt()) {
-                System.out.print("Veuillez entrer un nombre valide (2-4) : ");
+                System.out.print(TerminalTools.warningText("Veuillez entrer un nombre valide (2-4) : "));
                 scanner.next();
             }
             numPlayers = scanner.nextInt();
