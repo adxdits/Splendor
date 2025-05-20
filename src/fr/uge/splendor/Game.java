@@ -10,7 +10,7 @@ public class Game {
     private final ArrayList<Noble> noblesShow = new ArrayList<>();
     private final List<List<Card>> cardsShow = new ArrayList<>();
     private int tourNumber = 0;
-    private TerminalDisplayer displayer = new TerminalDisplayer();
+    private final TerminalDisplayer displayer = new TerminalDisplayer();
 
     public Game(int numPlayers) {
         CardStack.loadCardFromCSV();
@@ -184,7 +184,7 @@ public class Game {
         for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
             GameColor color = entry.getKey();
             int quantity = entry.getValue();
-            tokenStack.computeIfPresent(color, (k, v) -> {
+            tokenStack.computeIfPresent(color, (_, v) -> {
                 v.refill(quantity);
                 return v;
             });
@@ -296,8 +296,7 @@ public class Game {
             List<Card> borrowedCards = player.getBorrowedCards();
 
             int index = displayer.displayBoard(cardsShow, 0);
-
-            displayer.displayBorrowedCards(borrowedCards, null);
+            displayer.displayBorrowedCards(borrowedCards, index);
             System.out.println(TerminalTools.askText("Choisissez une carte à acheter : (-1 pour annuler)"));
             Scanner scanner = new Scanner(System.in);
             String choiceStr = scanner.next();
