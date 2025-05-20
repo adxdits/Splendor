@@ -12,6 +12,7 @@ public record Noble(
         if (prestigePoints < 0) {
             throw new IllegalArgumentException("Prestige points cannot be negative");
         }
+
         Objects.requireNonNull(cost);
     }
 

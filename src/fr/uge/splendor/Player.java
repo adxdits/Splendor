@@ -3,8 +3,8 @@ package fr.uge.splendor;
 import java.util.*;
 
 public class Player {
-    private final EnumMap<GameColor, Integer> tokens = new EnumMap<>(GameColor.class);
-    private final EnumMap<GameColor, Integer> advantages = new EnumMap<>(GameColor.class);
+    private final Map<GameColor, Integer> tokens = new TreeMap<>();
+    private final Map<GameColor, Integer> advantages = new TreeMap<>();
     private final ArrayList<Card> borrowedCards = new ArrayList<>();
     private final List<Card> cards = new ArrayList<>();
     private final List<Noble> nobles = new ArrayList<>();
@@ -12,8 +12,8 @@ public class Player {
     private final String name;
 
     public Player(int playerNumber) {
-        Arrays.stream(GameColor.values())
-                .forEach(color -> tokens.put(color, 2));
+        Arrays.stream(GameColor.values()).forEach(color -> advantages.put(color, 0));
+        Arrays.stream(GameColor.values()).forEach(color -> tokens.put(color, 2));
         name = "Player " + playerNumber;
     }
 
@@ -22,7 +22,7 @@ public class Player {
     }
 
     private Map<GameColor,Integer> removeTokens(Map<GameColor,Integer> tokensToRemove){
-        Map<GameColor, Integer> removedTokens = new HashMap<>();
+        Map<GameColor, Integer> removedTokens = new TreeMap<>();
         int yellowTokenUsed = 0;
         for (Map.Entry<GameColor, Integer> entry : tokensToRemove.entrySet()) {
             GameColor color = entry.getKey();
@@ -111,36 +111,26 @@ public class Player {
         return name;
     }
 
-    public void showState() {
-        showBorrowedCards();
-        showTokens();
-
-    }
-
-    private void showBorrowedCards() {
-        StringJoiner joiner = new StringJoiner("\t");
-        joiner.add("Cartes Empruntées :");
-        if (!borrowedCards.isEmpty()){
-            for (Card card : borrowedCards) {
-                joiner.add(card.toString());
-            }
-        }
-        System.out.println(joiner);
-    }
-
-    private void showTokens() {
-        StringBuilder sb = new StringBuilder("Jetons (Bonus) :{ ");
-        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
-            GameColor color = entry.getKey();
-            int quantity = entry.getValue();
-            int bonus = advantages.getOrDefault(color, 0);
-            sb.append(color).append(":").append(quantity).append("(").append(bonus).append(") ");
-        }
-        sb.append("}");
-        System.out.println(sb);
-    }
 
     public List<Card> getBorrowedCards() {
         return List.copyOf(borrowedCards);
+    }
+
+    public int countTokens() {
+        return tokens.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    public void throwToken(Token token){
+        tokens.merge(token.color(), -1, Integer::sum);
+    }
+
+    public Map<GameColor, Integer> getTokens() {
+        return Map.copyOf(tokens);
+    }
+
+    public Map<GameColor, Integer> getAdvantages() {
+        return Map.copyOf(advantages);
     }
 }

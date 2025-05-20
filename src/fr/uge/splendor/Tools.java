@@ -3,9 +3,7 @@ package fr.uge.splendor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Tools {
 
@@ -36,7 +34,7 @@ public class Tools {
         int red = parseCSVIntField(parts, 8);
         int black = parseCSVIntField(parts, 9);
 
-        HashMap<GameColor, Integer> price = new HashMap<>();
+        Map<GameColor, Integer> price = new TreeMap<>();
         price.put(GameColor.WHITE, white);
         price.put(GameColor.BLUE, blue);
         price.put(GameColor.GREEN, green);

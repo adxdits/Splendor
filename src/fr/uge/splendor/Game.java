@@ -2,14 +2,15 @@ package fr.uge.splendor;
 import java.util.*;
 
 public class Game {
+    private static final int TOKEN_MAX = 15;
     private final List<Player> players = new ArrayList<>();
-    private final Map<GameColor,TokenStack> tokenStack = new HashMap<>();
+    private final Map<GameColor,TokenStack> tokenStack = new TreeMap<>();
     private final List<CardStack> cardStack;
     private final NobleStack nobleStack = new NobleStack();
     private final ArrayList<Noble> noblesShow = new ArrayList<>();
-    private final ArrayList<ArrayList<Card>> cardsShow = new ArrayList<>();
+    private final List<List<Card>> cardsShow = new ArrayList<>();
     private int tourNumber = 0;
-
+    private TerminalDisplayer displayer = new TerminalDisplayer();
 
     public Game(int numPlayers) {
         CardStack.loadCardFromCSV();
@@ -70,8 +71,6 @@ public class Game {
             executeTurn(currentPlayer);
 
             tourNumber++;
-            //break;
-
         }
         announceWinner();
         /*while (!cardStack.isEmpty()) {
@@ -86,6 +85,10 @@ public class Game {
 
     private void executeTurn(Player player) {
         askPlayerAction(player);
+        while (player.countTokens() > TOKEN_MAX){
+            askPlayerThrowTokens(player);
+        }
+
         /*
         // Prendre 2 jetons de même couleur
         if (!tokenStack.isEmpty()) {
@@ -102,58 +105,58 @@ public class Game {
         }*/
     }
 
+    private void askPlayerThrowTokens(Player player) {
+        System.out.println(TerminalTools.askText("Vous avez trop de jetons. Veuillez en jeter"));
+        Map<GameColor,Integer> playerToken = player.getTokens();
+        while (true){
+
+            displayer.displayPlayerTokens(playerToken, 0);
+            System.out.println(TerminalTools.askText("Choisissez la couleur du jeton à jeter : "));
+            Scanner scanner = new Scanner(System.in);
+            String choiceStr = scanner.next();
+            int colorIndex;
+            try {
+                colorIndex = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
+                continue;
+            }
+            if (colorIndex == -1) {
+                return;
+            }
+            if (colorIndex < 0 || colorIndex >= playerToken.size()) {
+                System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));
+                continue;
+            }
+            GameColor color = player.getTokens().keySet().stream().toList().get(colorIndex);
+            int tokenTakeByColor = playerToken.getOrDefault(color, 0);
+            if (tokenTakeByColor <= 0) {
+                System.out.println(TerminalTools.warningText("Pas de jetons disponibles de cette couleur."));
+                continue;
+            }
+            player.throwToken(new Token(color));
+            tokenStack.get(color).refill(1);
+            System.out.println(TerminalTools.confirmText("Vous avez jeté le jeton : " + color));
+            break;
+
+
+
+        }
+    }
+
     private void showState(Player player) {
-        System.out.println("C'est le tour de " + player.getName());
         showBoard();
-        System.out.println();
-        System.out.println("État du joueur :");
-        player.showState();
+        displayer.displayPlayerTurn(player);
+        displayer.displayPlayer(player);
     }
 
     private void showBoard() {
-        showNobles();
-        showCards();
-        showTokens();
-        showScore();
+        displayer.displayNobles(noblesShow);
+        displayer.displayBoard(cardsShow, null);
+        displayer.displayTokensStack(tokenStack.values().stream().toList());
+        displayer.displayPlayersPoints(players.stream().toList());
     }
 
-    private void showScore() {
-        System.out.print("Scores : ");
-        StringJoiner joiner = new StringJoiner("\t");
-        for (Player player : players) {
-            joiner.add(player.getName() + ": " + player.getPrestigePoints() + "PT");
-        }
-        System.out.println(joiner);
-    }
-
-    private void showCards() {
-        cardsShow.forEach(cards -> {
-            System.out.print("Niveau " + (cards.get(0).level())+ " : ");
-            StringJoiner joiner = new StringJoiner("\t");
-            for (Card card : cards) {
-                joiner.add(card.toString());
-            }
-            System.out.println(joiner);
-        });
-    }
-
-    private void showNobles() {
-        System.out.print("Nobles : ");
-        StringJoiner joiner = new StringJoiner("\t");
-        for (Noble noble : noblesShow) {
-            joiner.add(noble.toString());
-        }
-        System.out.println(joiner);
-    }
-
-    private void showTokens() {
-        System.out.print("Jetons : ");
-        StringJoiner joiner = new StringJoiner("\t");
-        for (TokenStack tokenStack : tokenStack.values()) {
-            joiner.add(tokenStack.toString());
-        }
-        System.out.println(joiner);
-    }
 
     private boolean haveWinner(){
         return players.stream().anyMatch(player -> player.getPrestigePoints() >= 15);
@@ -167,7 +170,7 @@ public class Game {
 
     private void refillCardsShowed(){
         for (int i = 0; i < cardsShow.size(); i++) { // we need i for know which level we need
-            ArrayList<Card> cards = cardsShow.get(i);
+            List<Card> cards = cardsShow.get(i);
             for (int j = 0; j < cards.size(); j++) {
                 if (cards.get(j) == null) {
                     Card card = (Card) cardStack.get(i).takeOne();
@@ -252,17 +255,8 @@ public class Game {
         }
         while (true){
             System.out.println("Cartes disponibles : ");
-            for (int i = 0; i < cardsShow.size(); i++) {
-                for (int j = 0; j < cardsShow.get(i).size(); j++) {
-                    if (cardsShow.get(i).get(j) == null) {
-                        continue;
-                    }
-                    int index = i * 4 + j;
-                    String str = index + " = " + cardsShow.get(i).get(j) + "\t";
-                    System.out.print(TerminalTools.interactiveText(str));
-                }
-                System.out.println();
-            }
+            displayer.displayBoard(cardsShow, 0);
+
             System.out.println(TerminalTools.askText("Choisissez une carte à réserver : (-1 pour annuler)"));
             Scanner scanner = new Scanner(System.in);
             String choiceStr = scanner.next();
@@ -299,28 +293,11 @@ public class Game {
 
     private boolean askPlayerBuyCard(Player player) {
         while (true){
-            int index = 0;
-            System.out.println("Cartes disponibles : ");
-            for (int i = 0; i < cardsShow.size(); i++) {
-                for (int j = 0; j < cardsShow.get(i).size(); j++) {
-                    if (cardsShow.get(i).get(j) == null) {
-                        continue;
-                    }
-                    index = i * 4 + j;
-                    String str = index + " = " + cardsShow.get(i).get(j) + "\t";
-                    System.out.print(TerminalTools.interactiveText(str));
-                }
-                System.out.println();
-            }
-            //show cards borrowed by the player for he can buy them
-            System.out.println("Cartes réservées : ");
             List<Card> borrowedCards = player.getBorrowedCards();
-            for (Card card : borrowedCards) {
-                index++;
-                String str = index + " = " + card + "\t";
-                System.out.print(TerminalTools.interactiveText(str));
-            }
-            System.out.println();
+
+            int index = displayer.displayBoard(cardsShow, 0);
+
+            displayer.displayBorrowedCards(borrowedCards, null);
             System.out.println(TerminalTools.askText("Choisissez une carte à acheter : (-1 pour annuler)"));
             Scanner scanner = new Scanner(System.in);
             String choiceStr = scanner.next();
@@ -381,18 +358,12 @@ public class Game {
 
     private boolean askPlayerTakeTokens(Player player) {
         System.out.println(TerminalTools.askText("Choisissez les jetons à prendre : (-1 pour annuler)"));
-        HashMap<GameColor, Integer> tmpTokens = new HashMap<>();
+        Map<GameColor, Integer> tmpTokens = new TreeMap<>();
         var listTokenCanBeTaken = tokenStack.keySet().stream().filter(color -> color!= GameColor.YELLOW).toList();
 
         Scanner scanner = new Scanner(System.in);
         while (true){
-            System.out.println("Jetons disponibles (jeton pris) : ");
-            for (int i = 0; i < listTokenCanBeTaken.size() ; i++) {
-                GameColor color = listTokenCanBeTaken.get(i);
-                int tmpToken = tmpTokens.getOrDefault(color, 0);
-                String text = i + " = " + color + " : " + tokenStack.get(color).remainingTokens() + " (pris : " + tmpToken + ")\t";
-                System.out.println(TerminalTools.interactiveText(text));
-            }
+            displayer.displayStacksTaken(tokenStack.values().stream().toList(), tmpTokens);
             int tokenTake = tmpTokens.values().stream().reduce(0, Integer::sum);
             boolean twoSameColor = tmpTokens.values().stream().anyMatch(v -> v == 2);
             if (tokenTake == 3 || twoSameColor){

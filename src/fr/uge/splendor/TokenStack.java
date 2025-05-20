@@ -38,6 +38,9 @@ public class TokenStack implements Stack {
         if (nbToken < 0) {
             throw new IllegalArgumentException("Number of tokens to refill cannot be negative");
         }
+        if (tokens + nbToken > maximumTokens) {
+            throw new IllegalStateException("Cannot exceed maximum tokens in the stack");
+        }
         tokens += nbToken;
     }
 
@@ -58,8 +61,12 @@ public class TokenStack implements Stack {
         return tokens;
     }
 
+    public GameColor getColor() {
+        return color;
+    }
+
     @Override
     public String toString() {
-        return "{ C:" + color + " | Q:" + tokens + " }";
+        return color + " : " + tokens;
     }
 }
