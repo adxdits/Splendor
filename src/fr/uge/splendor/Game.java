@@ -396,6 +396,11 @@ public class Game {
                 System.out.println(TerminalTools.warningText("Vous ne pouvez pas prendre 2 jetons de la même couleur."));
                 continue;
             }
+            // Si le joueur essaye de prendre un second jeton alors que la pile est a moins de 4 jetons
+            if (tokenTakeByColor == 1 && tokenStack.get(color).remainingTokens() < 4) {
+                System.out.println(TerminalTools.warningText("Vous ne pouvez pas prendre un second jeton de cette couleur."));
+                continue;
+            }
             tmpTokens.merge(color, 1, Integer::sum);
         }
         for (Map.Entry<GameColor, Integer> entry : tmpTokens.entrySet()) {
