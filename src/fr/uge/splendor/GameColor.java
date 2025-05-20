@@ -20,25 +20,15 @@ public enum GameColor {
         };
     }
 
-    public String shortName() {
-        return switch (this) {
-            case GREEN -> "V";
-            case WHITE -> "BC";
-            case BLACK -> "N";
-            case YELLOW -> "J";
-            case RED -> "R";
-            case BLUE -> "B";
-        };
-    }
 
     public String toString() {
         return switch (this) {
-            case GREEN -> "Vert";
-            case WHITE -> "Blanc";
-            case BLACK -> "Noir";
-            case YELLOW -> "Jaune";
-            case RED -> "Rouge";
-            case BLUE -> "Bleu";
+            case GREEN -> "\uD83D\uDFE9";
+            case WHITE -> "\uD83D\uDD33";
+            case BLACK -> "\uD83D\uDD32";
+            case YELLOW -> "\uD83D\uDFE8";
+            case RED -> "\uD83D\uDFE5";
+            case BLUE -> "\uD83D\uDFE6";
         };
     }
 }

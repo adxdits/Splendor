@@ -134,7 +134,7 @@ public class Player {
             GameColor color = entry.getKey();
             int quantity = entry.getValue();
             int bonus = advantages.getOrDefault(color, 0);
-            sb.append(color.shortName()).append(":").append(quantity).append("(").append(bonus).append(") ");
+            sb.append(color).append(":").append(quantity).append("(").append(bonus).append(") ");
         }
         sb.append("}");
         System.out.println(sb);
