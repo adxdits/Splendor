@@ -1,9 +1,5 @@
-package fr.uge.splendor;
+package fr.uge.splendor.model;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 public class TokenStack implements Stack {

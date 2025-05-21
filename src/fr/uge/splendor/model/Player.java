@@ -1,8 +1,9 @@
-package fr.uge.splendor;
+package fr.uge.splendor.model;
 
 import java.util.*;
 
 public class Player {
+
     private final Map<GameColor, Integer> tokens = new TreeMap<>();
     private final Map<GameColor, Integer> advantages = new TreeMap<>();
     private final ArrayList<Card> borrowedCards = new ArrayList<>();
@@ -12,8 +13,8 @@ public class Player {
     private final String name;
 
     public Player(int playerNumber) {
-        Arrays.stream(GameColor.values()).forEach(color -> advantages.put(color, 0));
-        Arrays.stream(GameColor.values()).forEach(color -> tokens.put(color, 2));
+        Arrays.stream(GameColor.values()).forEach(color -> advantages.put(color, 3));
+        Arrays.stream(GameColor.values()).forEach(color -> tokens.put(color, 0));
         name = "Player " + playerNumber;
     }
 
@@ -34,6 +35,7 @@ public class Player {
 
                 yellowTokenUsed += cost - currentTokens - bonus;
                 tokens.put(color, 0);
+
                 removedTokens.put(color, currentTokens);
             }
             else {

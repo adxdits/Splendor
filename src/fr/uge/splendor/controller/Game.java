@@ -1,10 +1,14 @@
-package fr.uge.splendor;
+package fr.uge.splendor.controller;
+import fr.uge.splendor.model.*;
+import fr.uge.splendor.view.TerminalDisplayer;
+import fr.uge.splendor.view.TerminalTools;
+
 import java.util.*;
 
 public class Game {
-    private static final int TOKEN_MAX = 15;
+    private final GameSettings gameSettings;
     private final List<Player> players = new ArrayList<>();
-    private final Map<GameColor,TokenStack> tokenStack = new TreeMap<>();
+    private final Map<GameColor, TokenStack> tokenStack = new TreeMap<>();
     private final List<CardStack> cardStack;
     private final NobleStack nobleStack = new NobleStack();
     private final ArrayList<Noble> noblesShow = new ArrayList<>();
@@ -12,11 +16,16 @@ public class Game {
     private int tourNumber = 0;
     private final TerminalDisplayer displayer = new TerminalDisplayer();
 
-    public Game(int numPlayers) {
+    public Game(GameSettings gameSettings) {
+        this.gameSettings = gameSettings;
         CardStack.loadCardFromCSV();
-        cardStack = List.of(new CardStack(1),new CardStack(2),new CardStack(3));
+        if(gameSettings.useSimplePlay()){
+            cardStack = List.of(new CardStack(true));
+        }else{
+            cardStack = List.of(new CardStack(1),new CardStack(2),new CardStack(3));
+        }
 
-        for (int i = 0; i < numPlayers; i++) {
+        for (int i = 0; i < gameSettings.playerCount(); i++) {
             players.add(new Player(i+1));
         }
         prepareBoard();
@@ -28,6 +37,9 @@ public class Game {
     }
 
     private void prepareNobles() {
+        if (gameSettings.useSimplePlay()){
+            return;
+        }
         int noblesToShow = getNoblesToShow();
         for (int i = 0; i < noblesToShow; i++) {
             Noble noble = (Noble) nobleStack.takeOne();
@@ -38,8 +50,9 @@ public class Game {
 
     private void prepareBoard() {
         prepareTokens();
-        prepareNobles();
         prepareCards();
+        prepareNobles();
+
     }
 
     private void prepareTokens() {
@@ -73,36 +86,15 @@ public class Game {
             tourNumber++;
         }
         announceWinner();
-        /*while (!cardStack.isEmpty()) {
-            for (Player player : players) {
-                executeTurn(player);
-                if (cardStack.isEmpty()) break;
-            }
-        }
-        announceWinner();*/
     }
 
 
     private void executeTurn(Player player) {
         askPlayerAction(player);
-        while (player.countTokens() > TOKEN_MAX){
+        while (player.countTokens() > gameSettings.tokenMax()){
             askPlayerThrowTokens(player);
         }
 
-        /*
-        // Prendre 2 jetons de même couleur
-        if (!tokenStack.isEmpty()) {
-            Token token = (Token) tokenStack.get(0).takeOne();
-            player.addTokens(token.color(), 2);
-        }
-
-        // Acheter une carte si possible
-        if (!cardStack.isEmpty()) {
-            Card card = (Card) cardStack.get(0).takeOne();
-            if (player.canBuyCard(card)) {
-                player.buyCard(card);
-            }
-        }*/
     }
 
     private void askPlayerThrowTokens(Player player) {
@@ -112,20 +104,12 @@ public class Game {
 
             displayer.displayPlayerTokens(playerToken, 0);
             System.out.println(TerminalTools.askText("Choisissez la couleur du jeton à jeter : "));
-            Scanner scanner = new Scanner(System.in);
-            String choiceStr = scanner.next();
-            int colorIndex;
-            try {
-                colorIndex = Integer.parseInt(choiceStr);
-            } catch (NumberFormatException e) {
-                System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
-                continue;
-            }
+            int colorIndex = TerminalTools.getSecurisedInput();
             if (colorIndex == -1) {
                 return;
             }
             if (colorIndex < 0 || colorIndex >= playerToken.size()) {
-                System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));
+                displayer.showInvalidChoice();
                 continue;
             }
             GameColor color = player.getTokens().keySet().stream().toList().get(colorIndex);
@@ -207,20 +191,8 @@ public class Game {
     private void askPlayerAction(Player player) {
         // Demander à chaque joueur de choisir une action
         while (true) {
-            System.out.println(TerminalTools.askText( player.getName() + ", choisissez une action :"));
-            System.out.println(TerminalTools.interactiveText("1. Prendre des jetons"));
-            System.out.println(TerminalTools.interactiveText("2. Acheter une carte"));
-            System.out.println(TerminalTools.interactiveText("3. Réserver une carte"));
-
-            Scanner scanner = new Scanner(System.in);
-            String choiceStr = scanner.next();
-            int choice;
-            try {
-                choice = Integer.parseInt(choiceStr);
-            } catch (NumberFormatException e) {
-                System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
-                continue;
-            }
+            displayer.displayActions(gameSettings.useSimplePlay());
+            int choice = TerminalTools.getSecurisedInput();
             switch (choice) {
                 case 1 -> {
                     if (!askPlayerTakeTokens(player)){
@@ -234,13 +206,17 @@ public class Game {
                     refillCardsShowed();
                 }
                 case 3 -> {
+                    if(gameSettings.useSimplePlay()){
+                        displayer.showInvalidChoice();
+                        continue;
+                    }
                     if (!askPlayerReserveCard(player)){
                         continue;
                     }
                     refillCardsShowed();
                 }
                 default -> {
-                    System.out.println(TerminalTools.warningText("Choix invalide."));
+                    displayer.showInvalidChoice();
                     continue;
                 }
             }
@@ -250,30 +226,18 @@ public class Game {
 
     private boolean askPlayerReserveCard(Player player) {
         if (!player.canBorrowCard()){
-            System.out.println(TerminalTools.warningText("Vous ne pouvez pas réserver de carte. Vous avez déjà 3 cartes réservées."));
+            System.out.println(TerminalTools.warningText("Vous ne pouvez pas réserver de carte. Vous avez déjà " + gameSettings.borrowedCardsMax() + " cartes réservées."));
             return false;
         }
         while (true){
-            System.out.println("Cartes disponibles : ");
             displayer.displayBoard(cardsShow, 0);
 
             System.out.println(TerminalTools.askText("Choisissez une carte à réserver : (-1 pour annuler)"));
-            Scanner scanner = new Scanner(System.in);
-            String choiceStr = scanner.next();
-            int cardIndex;
-            try {
-                cardIndex = Integer.parseInt(choiceStr);
-            } catch (NumberFormatException e) {
-                System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
-                continue;
-            }
-            if (cardIndex == -1) {
-                return false;
-            }
+            int cardIndex = TerminalTools.getSecurisedInput();
             int columnIndex = cardIndex / 4;
             int rowIndex = cardIndex % 4;
             if (columnIndex < 0 || columnIndex >= cardsShow.size() || rowIndex < 0 || rowIndex >= cardsShow.get(columnIndex).size()) {
-                System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));
+                displayer.showInvalidChoice();
                 continue;
             }
             Card card = cardsShow.get(columnIndex).get(rowIndex);
@@ -298,22 +262,14 @@ public class Game {
             int index = displayer.displayBoard(cardsShow, 0);
             displayer.displayBorrowedCards(borrowedCards, index);
             System.out.println(TerminalTools.askText("Choisissez une carte à acheter : (-1 pour annuler)"));
-            Scanner scanner = new Scanner(System.in);
-            String choiceStr = scanner.next();
-            int cardIndex;
-            try {
-                cardIndex = Integer.parseInt(choiceStr);
-            } catch (NumberFormatException e) {
-                System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
-                continue;
-            }
+            int cardIndex = TerminalTools.getSecurisedInput();
             if (cardIndex == -1) {
                 return false;
             }
             if (cardIndex >= cardsShow.size() * cardsShow.getFirst().size()){
                 int borrowedCardIndex = cardIndex - cardsShow.size() * cardsShow.getFirst().size();
                 if (borrowedCardIndex < 0 || borrowedCardIndex >= borrowedCards.size()) {
-                    System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));
+                    displayer.showInvalidChoice();
                     continue;
                 }
                 Card card = borrowedCards.get(borrowedCardIndex);
@@ -333,12 +289,12 @@ public class Game {
             int columnIndex = cardIndex / 4;
             int rowIndex = cardIndex % 4;
             if (columnIndex < 0 || columnIndex >= cardsShow.size() || rowIndex < 0 || rowIndex >= cardsShow.get(columnIndex).size()) {
-                System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));
+                displayer.showInvalidChoice();
                 continue;
             }
             Card card = cardsShow.get(columnIndex).get(rowIndex);
             if (card == null) {
-                System.out.println(TerminalTools.warningText("Pas de carte disponible à cette position."));
+                displayer.showInvalidChoice();
                 continue;
             }
             if (player.canBuyCard(card)) {
@@ -360,7 +316,6 @@ public class Game {
         Map<GameColor, Integer> tmpTokens = new TreeMap<>();
         var listTokenCanBeTaken = tokenStack.keySet().stream().filter(color -> color!= GameColor.YELLOW).toList();
 
-        Scanner scanner = new Scanner(System.in);
         while (true){
             displayer.displayStacksTaken(tokenStack.values().stream().toList(), tmpTokens);
             int tokenTake = tmpTokens.values().stream().reduce(0, Integer::sum);
@@ -370,19 +325,12 @@ public class Game {
             }
 
             System.out.println(TerminalTools.askText("Choisissez l'index de la couleur du jeton :"));
-            String choiceStr = scanner.next();
-            int colorIndex;
-            try {
-                colorIndex = Integer.parseInt(choiceStr);
-            } catch (NumberFormatException e) {
-                System.out.println(TerminalTools.warningText("Choix invalide. Veuillez entrer un nombre."));
-                continue;
-            }
+            int colorIndex = TerminalTools.getSecurisedInput();
             if (colorIndex == -1) {
                 return false;
             }
             if (colorIndex < 0 || colorIndex >= listTokenCanBeTaken.size()) {
-                System.out.println(TerminalTools.warningText("Index invalide. Veuillez réessayer."));
+                displayer.showInvalidChoice();
                 continue;
             }
             GameColor color = listTokenCanBeTaken.get(colorIndex);

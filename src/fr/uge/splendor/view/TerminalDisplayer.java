@@ -1,4 +1,6 @@
-package fr.uge.splendor;
+package fr.uge.splendor.view;
+
+import fr.uge.splendor.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -121,6 +123,19 @@ public class TerminalDisplayer {
             System.out.print(player.getName() + " : " + player.getPrestigePoints() + " points\t");
         }
         System.out.println();
+    }
+
+    public void displayActions(boolean useSimpleGame){
+        System.out.println(TerminalTools.askText("Choisissez une action :"));
+        System.out.println(TerminalTools.interactiveText("\t1. Prendre des jetons"));
+        System.out.println(TerminalTools.interactiveText("\t2. Acheter une carte"));
+        if (!useSimpleGame){
+            System.out.println(TerminalTools.interactiveText("\t3. Réserver une carte"));
+        }
+    }
+
+    public void showInvalidChoice() {
+        System.out.println(TerminalTools.errorText("Choix invalide, veuillez réessayer."));
     }
 
 

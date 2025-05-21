@@ -1,4 +1,4 @@
-package fr.uge.splendor;
+package fr.uge.splendor.model;
 
 import java.util.Collections;
 import java.util.List;

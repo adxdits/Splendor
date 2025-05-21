@@ -1,4 +1,4 @@
-package fr.uge.splendor;
+package fr.uge.splendor.model;
 
 public enum GameColor {
     GREEN,
@@ -8,7 +8,7 @@ public enum GameColor {
     RED,
     BLUE;
 
-    static GameColor getGameColorFromString(String color) {
+    public static GameColor getGameColorFromString(String color) {
         return switch (color) {
             case "green" -> GREEN;
             case "white" -> WHITE;

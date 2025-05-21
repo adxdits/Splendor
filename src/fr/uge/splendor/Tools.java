@@ -1,5 +1,8 @@
 package fr.uge.splendor;
 
+import fr.uge.splendor.model.Card;
+import fr.uge.splendor.model.GameColor;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +54,7 @@ public class Tools {
         return new Card(level, gemColor, pv, price);
     }
 
-    static List<Card> LoadingCardsOnCSV(Path path) throws IOException {
+    public static List<Card> LoadingCardsOnCSV(Path path) throws IOException {
         ArrayList<Card> cards = new ArrayList<>();
 
         int header_size = 2;

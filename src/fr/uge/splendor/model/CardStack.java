@@ -1,4 +1,7 @@
-package fr.uge.splendor;
+package fr.uge.splendor.model;
+
+import fr.uge.splendor.view.TerminalTools;
+import fr.uge.splendor.Tools;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -20,21 +23,25 @@ public class CardStack implements Stack {
     }
 
     public CardStack(int level) {
-        cards.addAll(all_cards.get(level));
-        Collections.shuffle(cards);
+        initializeCards(level,false);
     }
 
+    public CardStack(boolean useSimpleGame){
+        initializeCards(1,useSimpleGame);
+    }
 
-    private void initializeCards() { // simple version
-        /*for (GameColor color : GameColor.values()) {
-            if (color == GameColor.YELLOW) continue;
-
-            Map<GameColor, Integer> cost = Collections.singletonMap(color, 3);
-
-            for (int i = 0; i < 8; i++) {
-                cards.add(new Card(1, color, 1, cost));
+    private void initializeCards(int level,boolean useSimpleGame) {
+        if (useSimpleGame) {
+            for (GameColor color : GameColor.values()) {
+                if (color == GameColor.YELLOW) continue;
+                Map<GameColor,Integer> cost = Map.of(color, 3);
+                for (int i = 0; i < 8; i++) {
+                    cards.add(new Card(level, color, 3, cost));
+                }
             }
-        }*/
+        }else {
+            cards.addAll(all_cards.get(level));
+        }
 
         Collections.shuffle(cards);
     }
@@ -45,7 +52,6 @@ public class CardStack implements Stack {
             throw new IllegalStateException("No cards left in the stack");
         }
         return cards.pop();
-        //return cards.remove(cards.size() - 1);
     }
 
     public boolean isEmpty() {

@@ -1,8 +1,23 @@
 package fr.uge.splendor;
 
+import fr.uge.splendor.controller.Game;
+import fr.uge.splendor.controller.GameSettings;
+import fr.uge.splendor.view.TerminalTools;
+
 import java.util.Scanner;
 
 public class Main {
+
+    private static boolean askSimplePlay() {
+        Scanner scanner = new Scanner(System.in);
+        String response = "";
+        while (!response.equals("O") && !response.equals("N")) {
+            System.out.print(TerminalTools.askText("Souhaitez-vous jouer en mode simple ? (O/N) : "));
+            response = scanner.nextLine().trim().toUpperCase();
+        }
+        return response.equals("O");
+    }
+
     private static int askPlayers() {
         Scanner scanner = new Scanner(System.in);
         int numPlayers;
@@ -18,9 +33,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println("🚀 Démarrage du Splendor Phase 1 !");
+        boolean simplePlay = askSimplePlay();
         int numPlayers = askPlayers();
-
-        new Game(numPlayers).play();
+        GameSettings settings = new GameSettings(simplePlay,numPlayers);
+        new Game(settings).play();
     }
 }
