@@ -19,15 +19,10 @@ public class Main {
     }
 
     private static int askPlayers() {
-        Scanner scanner = new Scanner(System.in);
         int numPlayers;
         do {
             System.out.print(TerminalTools.askText("Combien de joueurs ? (2-4) : "));
-            while (!scanner.hasNextInt()) {
-                System.out.print(TerminalTools.warningText("Veuillez entrer un nombre valide (2-4) : "));
-                scanner.next();
-            }
-            numPlayers = scanner.nextInt();
+            numPlayers = TerminalTools.getSecurisedInput();
         } while (numPlayers < 2 || numPlayers > 4);
         return numPlayers;
     }
