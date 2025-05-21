@@ -402,11 +402,14 @@ public class Game {
             }
             tmpTokens.merge(color, 1, Integer::sum);
         }
+
         for (Map.Entry<GameColor, Integer> entry : tmpTokens.entrySet()) {
             GameColor color = entry.getKey();
             int quantity = entry.getValue();
             player.addTokens(color, quantity);
-            tokenStack.get(color).takeOne();
+            for (int i = 0; i < quantity; i++) {
+                tokenStack.get(color).takeOne();
+            }
         }
 
         System.out.println(TerminalTools.confirmText("Vous avez pris : " + tmpTokens));
