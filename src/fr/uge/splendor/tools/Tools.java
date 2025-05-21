@@ -1,4 +1,4 @@
-package fr.uge.splendor;
+package fr.uge.splendor.tools;
 
 import fr.uge.splendor.model.Card;
 import fr.uge.splendor.model.GameColor;
@@ -9,6 +9,14 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Tools {
+
+    public static final  int INDEX_LEVEL = 0;
+    public static final int INDEX_PV = 2;
+    public static final int INDEX_WHITE = 5;
+    public static final int INDEX_BLUE = 6;
+    public static final int INDEX_GREEN = 7;
+    public static final int INDEX_RED = 8;
+    public static final int INDEX_BLACK = 9;
 
     private static int parseIntOrDefault(String str, int defaultValue) {
         try {
@@ -28,14 +36,15 @@ public class Tools {
 
         String[] parts = line.split(",");
 
-        int level = parseCSVIntField(parts, 0);
+        int level = parseCSVIntField(parts, INDEX_LEVEL);
         GameColor gemColor = GameColor.getGameColorFromString(parts[1]);
-        int pv = parseCSVIntField(parts,2);
-        int white = parseCSVIntField(parts, 5);
-        int blue = parseCSVIntField(parts, 6);
-        int green = parseCSVIntField(parts, 7);
-        int red = parseCSVIntField(parts, 8);
-        int black = parseCSVIntField(parts, 9);
+        // magic numbers NOOO
+        int pv = parseCSVIntField(parts,INDEX_PV);
+        int white = parseCSVIntField(parts, INDEX_WHITE);
+        int blue = parseCSVIntField(parts, INDEX_BLUE);
+        int green = parseCSVIntField(parts, INDEX_GREEN);
+        int red = parseCSVIntField(parts, INDEX_RED);
+        int black = parseCSVIntField(parts, INDEX_BLACK);
 
         Map<GameColor, Integer> price = new TreeMap<>();
         price.put(GameColor.WHITE, white);

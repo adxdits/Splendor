@@ -8,7 +8,7 @@ public record Card(
         GameColor color,
         int prestigePoints,
         Map<GameColor, Integer> cost
-) implements Item {
+) {
 
     public Card {
         if (level < 1 || level > 3) {

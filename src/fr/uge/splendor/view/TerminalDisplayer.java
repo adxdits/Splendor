@@ -1,6 +1,7 @@
 package fr.uge.splendor.view;
 
 import fr.uge.splendor.model.*;
+import fr.uge.splendor.tools.TerminalTools;
 
 import java.util.List;
 import java.util.Map;

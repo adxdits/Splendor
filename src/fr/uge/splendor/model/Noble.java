@@ -6,7 +6,7 @@ import java.util.Objects;
 public record Noble(
         int prestigePoints,
         Map<GameColor, Integer> cost
-) implements Item {
+) {
 
     public Noble {
         if (prestigePoints < 0) {

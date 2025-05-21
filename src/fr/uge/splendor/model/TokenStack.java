@@ -2,7 +2,7 @@ package fr.uge.splendor.model;
 
 import java.util.Objects;
 
-public class TokenStack implements Stack {
+public class TokenStack {
     private int tokens;
     private final GameColor color;
     private final int maximumTokens;
@@ -40,8 +40,7 @@ public class TokenStack implements Stack {
         tokens += nbToken;
     }
 
-    @Override
-    public Item takeOne() {
+    public Token takeOne() {
         if (tokens <= 0) {
             throw new IllegalStateException("No tokens left in the stack");
         }
