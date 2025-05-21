@@ -2,7 +2,7 @@ package fr.uge.splendor;
 
 import fr.uge.splendor.controller.Game;
 import fr.uge.splendor.controller.GameSettings;
-import fr.uge.splendor.view.TerminalTools;
+import fr.uge.splendor.tools.TerminalTools;
 
 import java.util.Scanner;
 

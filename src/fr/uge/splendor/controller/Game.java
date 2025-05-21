@@ -1,7 +1,7 @@
 package fr.uge.splendor.controller;
 import fr.uge.splendor.model.*;
 import fr.uge.splendor.view.TerminalDisplayer;
-import fr.uge.splendor.view.TerminalTools;
+import fr.uge.splendor.tools.TerminalTools;
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ public class Game {
         }
         int noblesToShow = getNoblesToShow();
         for (int i = 0; i < noblesToShow; i++) {
-            Noble noble = (Noble) nobleStack.takeOne();
+            Noble noble = nobleStack.takeOne();
             noblesShow.add(noble);
         }
     }
@@ -64,7 +64,7 @@ public class Game {
             ArrayList<Card> cards = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 if (!stack.isEmpty()) {
-                    Card card = (Card) stack.takeOne();
+                    Card card = stack.takeOne();
                     cards.add(card);
                 }
             }
@@ -157,7 +157,7 @@ public class Game {
             List<Card> cards = cardsShow.get(i);
             for (int j = 0; j < cards.size(); j++) {
                 if (cards.get(j) == null) {
-                    Card card = (Card) cardStack.get(i).takeOne();
+                    Card card = cardStack.get(i).takeOne();
                     cards.set(j, card);
                 }
             }

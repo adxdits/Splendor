@@ -1,14 +1,14 @@
 package fr.uge.splendor.model;
 
-import fr.uge.splendor.view.TerminalTools;
-import fr.uge.splendor.Tools;
+import fr.uge.splendor.tools.TerminalTools;
+import fr.uge.splendor.tools.Tools;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CardStack implements Stack {
+public class CardStack {
     private static Map<Integer,List<Card>> all_cards = new HashMap<>(); // level -> cards
     private final java.util.Stack<Card> cards = new java.util.Stack<>();
 
@@ -46,8 +46,7 @@ public class CardStack implements Stack {
         Collections.shuffle(cards);
     }
 
-    @Override
-    public Item takeOne() {
+    public Card takeOne() {
         if (cards.isEmpty()) {
             throw new IllegalStateException("No cards left in the stack");
         }

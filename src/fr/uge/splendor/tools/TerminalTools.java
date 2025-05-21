@@ -1,4 +1,6 @@
-package fr.uge.splendor.view;
+package fr.uge.splendor.tools;
+
+import fr.uge.splendor.view.TerminalDisplayer;
 
 import java.util.Scanner;
 

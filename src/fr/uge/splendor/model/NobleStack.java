@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class NobleStack implements Stack {
+public class NobleStack {
     private final java.util.Stack<Noble> stack;
 
     public NobleStack() {
@@ -13,8 +13,7 @@ public class NobleStack implements Stack {
         Collections.shuffle(stack);
     }
 
-    @Override
-    public Item takeOne() {
+    public Noble takeOne() {
         if (stack.isEmpty()) {
             throw new IllegalStateException("No nobles left in the stack");
         }
