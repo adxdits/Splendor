@@ -45,7 +45,8 @@ public class TokensBundle {
         return bundle.getOrDefault(color, 0);
     }
 
-    public boolean isLessThan(TokensBundle other) {
+    // Check if this TokensBundle can cover the other TokensBundle (with the use of yellow tokens)
+    public boolean covers(TokensBundle other) {
         Objects.requireNonNull(other);
 
         int countExceeded = 0;
@@ -53,16 +54,15 @@ public class TokensBundle {
             if(color == GameColor.YELLOW){
                 continue;
             }
-            if (this.getTokenCount(color) <= other.getTokenCount(color)) {
+            if (this.getTokenCount(color) < other.getTokenCount(color)) {
                 countExceeded += other.getTokenCount(color) - this.getTokenCount(color);
             }
         }
-        return countExceeded < this.getTokenCount(GameColor.YELLOW) ;
+        return countExceeded <= this.getTokenCount(GameColor.YELLOW) ;
     }
 
     public TokensBundle subtract(TokensBundle other) {
         Objects.requireNonNull(other);
-//        System.out.println("CALLING SUBTRACT");
 
         for (GameColor color : GameColor.values()){
             subtract(color, other.getTokenCount(color));
@@ -93,13 +93,16 @@ public class TokensBundle {
     }
 
     // return a TokensBundle that contains the positive difference between this and other
-    public TokensBundle diff(TokensBundle other) {
+    public TokensBundle diffPos(TokensBundle other) {
         Objects.requireNonNull(other);
+        System.out.println("diffing " + this + " and " + other);
+
         TokensBundle result = new TokensBundle();
-        for (GameColor color : GameColor.values()) {
+        for (GameColor color : TokensBundle.getColorsSupported()) {
             int count = Math.max(0,this.getTokenCount(color) - other.getTokenCount(color));
             result.addToken(color, count);
         }
+        System.out.println("resulting diff = " + result);
         return result;
     }
 
@@ -126,5 +129,6 @@ public class TokensBundle {
         }
         return sb.toString();
     }
+
 
 }

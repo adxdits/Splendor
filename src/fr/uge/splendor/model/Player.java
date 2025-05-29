@@ -36,7 +36,8 @@ public class Player {
     }
 
     public TokensBundle buyCard(Card card) {
-        TokensBundle subtracted = tokens.copy().addTokens(advantages).subtract(card.cost()).diff(tokens);
+        TokensBundle subtracted = card.cost().diffPos(advantages);
+        tokens.subtract(subtracted);
         prestigePoints += card.prestigePoints();
         cards.add(card);
         advantages.addToken(card.color(), 1);
@@ -45,11 +46,7 @@ public class Player {
 
     public boolean canBuyCard(Card card) {
         TokensBundle all = tokens.copy().addTokens(advantages);
-        return card.cost().isLessThan(all);
-    }
-
-    public boolean canGetNoble(Noble noble){
-        return noble.cost().isLessThan(advantages);
+        return all.covers(card.cost());
     }
 
     public void takeNoble(Noble noble){

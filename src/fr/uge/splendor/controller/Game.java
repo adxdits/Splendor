@@ -135,8 +135,9 @@ public class Game {
         for (Player player : players) {
             for (int i = 0; i < board.getNobleCount();i++){
                 Noble noble = board.peekNoble(i);
-                if (noble.cost().isLessThan(player.getAdvantages())) {
+                if (player.getAdvantages().covers(noble.cost())) {
                     board.nobleHasBeenTaken(noble);
+                    player.takeNoble(noble);
                 }
             }
         }
@@ -157,7 +158,6 @@ public class Game {
                     if(!askPlayerBuyCard(player)){
                         continue;
                     }
-//                    refillCardsShowed();
                 }
                 case 3 -> {
                     if(gameSettings.useSimplePlay()){
@@ -167,7 +167,6 @@ public class Game {
                     if (!askPlayerReserveCard(player)){
                         continue;
                     }
-//                    refillCardsShowed();
                 }
                 default -> {
                     displayer.showInvalidChoice();
@@ -188,13 +187,13 @@ public class Game {
 
             System.out.println(TerminalTools.askText("Choisissez une carte à réserver : (-1 pour annuler)"));
             int cardIndex = TerminalTools.getSecurisedInput();
-            int columnIndex = cardIndex / board.getNbOfLevels(); // is it also the level of the card
+            int columnIndex = cardIndex / Board.CARDS_BY_LEVEL; // is it also the level of the card
             int rowIndex = cardIndex % Board.CARDS_BY_LEVEL;
             if (columnIndex < 0 || columnIndex >= board.getNbOfLevels() || rowIndex < 0 ) {
                 displayer.showInvalidChoice();
                 continue;
             }
-            Card card = board.peekCard(columnIndex,rowIndex);
+            Card card = board.peekCard(columnIndex+1,rowIndex);
             if (card == null) {
                 System.out.println(TerminalTools.warningText("Pas de carte disponible à cette position."));
                 continue;
@@ -203,8 +202,6 @@ public class Game {
             board.cardTaken(card);
             player.addTokens(GameColor.YELLOW, 1);
             board.takeToken(GameColor.YELLOW, 1);
-//            tokenStack.get(GameColor.YELLOW).takeOne();
-//            cardsShow.get(columnIndex).set(rowIndex, null);
 
             System.out.println(TerminalTools.confirmText("Vous avez réservé la carte : " + card));
             return true;
@@ -234,7 +231,6 @@ public class Game {
                     continue;
                 }
                 if (player.canBuyCard(card)) {
-
                     TokensBundle removedTokens = player.buyCard(card);
                     System.out.println(TerminalTools.confirmText("Vous avez acheté la carte : " + card));
                     board.refillTokenStack(removedTokens);
@@ -243,13 +239,15 @@ public class Game {
                     System.out.println(TerminalTools.warningText("Vous ne pouvez pas acheter cette carte."));
                 }
             }
-            int columnIndex = cardIndex / board.getNbOfLevels(); // is it also the level of the card
+            int columnIndex = cardIndex / Board.CARDS_BY_LEVEL;
             int rowIndex = cardIndex % Board.CARDS_BY_LEVEL;
+            System.out.println(TerminalTools.askText("Vous avez choisi la carte : " + columnIndex + "," + rowIndex));
             if (columnIndex < 0 || columnIndex >= board.getNbOfLevels() || rowIndex < 0) {
+                System.out.println(TerminalTools.warningText("Index de carte invalide." + board.getNbOfLevels()));
                 displayer.showInvalidChoice();
                 continue;
             }
-            Card card = board.peekCard(columnIndex,rowIndex);
+            Card card = board.peekCard(columnIndex+1,rowIndex);
             if (card == null) {
                 displayer.showInvalidChoice();
                 continue;
@@ -257,6 +255,7 @@ public class Game {
             if (player.canBuyCard(card)) {
                 TokensBundle removedTokens = player.buyCard(card);
                 System.out.println(TerminalTools.confirmText("Vous avez acheté la carte : " + card));
+                System.out.println(TerminalTools.confirmText("Vous avez payé : " + removedTokens));
                 board.refillTokenStack(removedTokens);
                 board.cardTaken(card);
                 return true;
@@ -314,16 +313,6 @@ public class Game {
             int quantity = tmpTokens.getTokenCount(color);
             board.takeToken(color, quantity);
         });
-
-
-//        for (Map.Entry<GameColor, Integer> entry : tmpTokens.entrySet()) {
-//            GameColor color = entry.getKey();
-//            int quantity = entry.getValue();
-//            player.addTokens(color, quantity);
-//            for (int i = 0; i < quantity; i++) {
-//                board.takeToken(color);
-//            }
-//        }
 
         System.out.println(TerminalTools.confirmText("Vous avez pris : " + tmpTokens));
         return true;

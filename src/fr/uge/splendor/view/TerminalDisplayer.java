@@ -4,6 +4,7 @@ import fr.uge.splendor.model.*;
 import fr.uge.splendor.tools.TerminalTools;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 public class TerminalDisplayer {
     public TerminalDisplayer(){
@@ -89,13 +90,14 @@ public class TerminalDisplayer {
     }
 
     public void displayPlayerTokenWithAdvantages(TokensBundle tokens, TokensBundle advantages){
-        System.out.println("Jetons possédés (Bonus) :{ ");
+        StringBuilder sb = new StringBuilder("Jetons possédés (Bonus) :{ ");
         for (GameColor color: TokensBundle.getColorsSupported()) {
             int bonus = advantages.getTokenCount(color);
             int quantity = tokens.getTokenCount(color);
-            System.out.print(color + ":" + quantity + "(" + bonus + ") ");
+            sb.append(color).append(":").append(quantity).append("(").append(bonus).append(") ");
         }
-        System.out.println("}");
+        sb.append("}");
+        System.out.println(sb.toString());
     }
 
     public void displayPlayerTurn(Player player) {
@@ -109,43 +111,32 @@ public class TerminalDisplayer {
     }
 
     public int displayPlayerTokens(TokensBundle tokens, Integer interactibleKey){
-        System.out.print("Jetons possédés :{ ");
+        StringBuilder sb = new StringBuilder("Jetons possédés :{ ");
+
         for (GameColor color : TokensBundle.getColorsSupported()) {
             int quantity = tokens.getTokenCount(color);
             String content = color + ":" + quantity;
             if (interactibleKey != null) {
-                System.out.print(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
+                sb.append(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
                 interactibleKey++;
             }
             else {
-                System.out.print("\t" + content);
+                sb.append("\t").append(content);
             }
         }
-
-//        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
-//            GameColor color = entry.getKey();
-//            int quantity = entry.getValue();
-//            String content = color + ":" + quantity;
-//            if (interactibleKey != null) {
-//                System.out.print(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
-//                interactibleKey++;
-//            }
-//            else {
-//                System.out.print("\t" + content);
-//            }
-//        }
-        System.out.println(" }");
-        System.out.println();
+        sb.append(" }");
+        System.out.print(sb);
 
         return interactibleKey == null ? 0 : interactibleKey;
     }
 
     public void displayPlayersPoints(List<Player> players){
         System.out.print("Score des joueurs : ");
+        StringJoiner joiner = new StringJoiner(" | ");
         for (Player player : players) {
-            System.out.print(player.getName() + " : " + player.getPrestigePoints() + " points\t");
+            joiner.add(player.getName() + " : " + player.getPrestigePoints() + " points");
         }
-        System.out.println();
+        System.out.println(joiner);
     }
 
     public void displayActions(boolean useSimpleGame){
