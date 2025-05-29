@@ -36,11 +36,15 @@ public class Player {
     }
 
     public TokensBundle buyCard(Card card) {
-        TokensBundle subtracted = card.cost().diffPos(advantages);
-        tokens.subtract(subtracted);
+        TokensBundle cost = card.cost().diffPos(advantages);
+        TokensBundle before = tokens.copy();
+        tokens.subtract(cost);
+        TokensBundle subtracted = before.diffPos(tokens);
+
         prestigePoints += card.prestigePoints();
         cards.add(card);
         advantages.addToken(card.color(), 1);
+        borrowedCards.remove(card);
         return subtracted;
     }
 

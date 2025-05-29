@@ -6,34 +6,33 @@ import fr.uge.splendor.tools.TerminalTools;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class TerminalDisplayer {
+public class TerminalDisplayer implements Displayer {
     public TerminalDisplayer(){
     }
 
     public int displayBoard(Board board, Integer interactibleKey){
 
-        System.out.println("Cartes disponibles :");
+        StringBuilder sb = new StringBuilder("Cartes disponibles :\n");
         for (int i = 0; i < board.getNbOfLevels(); i++) {
-            System.out.println("Level " + (i + 1) + ":");
+            sb.append("Level ").append(i + 1).append(":\n");
             for (int j = 0; j < Board.CARDS_BY_LEVEL; j++) {
                 Card card = board.peekCard(i+1,j);
                 String content = card != null ? card.toString() : "Vide";
                 if (interactibleKey != null) {
-                    System.out.println(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
+                    sb.append(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
                     interactibleKey++;
                 }
                 else {
-                    System.out.println("\t" + content);
+                    sb.append("\t").append(content).append("\n");
                 }
             }
         }
+        System.out.println(sb);
         return interactibleKey == null ? 0 : interactibleKey;
     }
 
     public void displayTokensStack(TokensBundle tokens){
-        // display inline
-        System.out.print("Pile de jetons : ");
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("Pile de jetons : ");
         for (GameColor color : TokensBundle.getColorsSupported()) {
             int count = tokens.getTokenCount(color);
             if (count > 0) {
@@ -47,23 +46,17 @@ public class TerminalDisplayer {
 
     public int displayStacksTaken(List<GameColor> colorOrder, TokensBundle tokenStacks, TokensBundle tokensTaken){
         int interactibleKey = 0;
-        System.out.println("Jetons disponibles (jeton pris) : ");
+        StringBuilder sb = new StringBuilder("Jetons disponibles (jeton pris) : ");
         for(GameColor color : colorOrder){
             int taken = tokensTaken.getTokenCount(color);
             int available = tokenStacks.getTokenCount(color);
+
             String content = color.toString() + available + " (pris : " + taken + ")";
-            System.out.println(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
+            sb.append(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
             interactibleKey++;
         }
 
-//        for (TokenStack tokenStack : tokens) {
-//            if (tokenStack.getColor() == GameColor.YELLOW) continue;
-//            String content = tokenStack.toString() + " (pris : " + takenStacks.getOrDefault(tokenStack.getColor(),0) + ")";
-//            System.out.println(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
-//            interactibleKey++;
-//
-//        }
-        System.out.println();
+        System.out.println(sb);
         return interactibleKey;
     }
 
@@ -97,7 +90,7 @@ public class TerminalDisplayer {
             sb.append(color).append(":").append(quantity).append("(").append(bonus).append(") ");
         }
         sb.append("}");
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 
     public void displayPlayerTurn(Player player) {
@@ -152,5 +145,51 @@ public class TerminalDisplayer {
         System.out.println(TerminalTools.errorText("Choix invalide, veuillez réessayer."));
     }
 
+    public void throwTokens(TokensBundle playerToken) {
+        System.out.println(TerminalTools.askText("Vous avez trop de jetons. Veuillez en jeter"));
+        displayPlayerTokens(playerToken, 0);
+        System.out.println(TerminalTools.askText("Choisissez la couleur du jeton à jeter : "));
+    }
+
+    public void noMoreTokens(){
+        System.out.println(TerminalTools.warningText("Pas de jetons disponibles de cette couleur."));
+    }
+
+    public void warn2TokensPerColor() {
+        System.out.println(TerminalTools.warningText("Vous ne pouvez pas prendre plus de 2 jetons de la meme couleur."));
+    }
+
+    public void warn2TokensImpossibleMove(){
+        System.out.println(TerminalTools.warningText("Vous ne pouvez pas prendre un second jeton de cette couleur."));
+
+    }
+
+    public void tokenThrow(GameColor color){
+        System.out.println(TerminalTools.confirmText("Vous avez jeté le jeton : " + color));
+    }
+
+    public void displayWinner(Player winner){
+        System.out.println("Le gagnant est " + winner.getName() + " avec " + winner.getPrestigePoints() + " points de prestige !");
+    }
+
+    public void cantBorrowCard(int nbBorrowedCards) {
+        System.out.println(TerminalTools.warningText("Vous ne pouvez pas réserver de carte. Vous avez déjà " + nbBorrowedCards + " cartes réservées."));
+    }
+
+    public void askToBorrowCard() {
+        System.out.println(TerminalTools.askText("Choisissez une carte à réserver : (-1 pour annuler)"));
+    }
+
+    public void askToBuyCard() {
+        System.out.println(TerminalTools.askText("Choisissez une carte à acheter : (-1 pour annuler)"));
+    }
+
+    public void askToTakeTokens() {
+        System.out.println(TerminalTools.askText("Choisissez les jetons à prendre : (-1 pour annuler)"));
+    }
+
+    public void cantBuyCard(){
+        System.out.println(TerminalTools.warningText("Vous ne pouvez pas acheter cette carte."));
+    }
 
 }

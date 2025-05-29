@@ -7,7 +7,7 @@ public class TokensBundle {
 
     public TokensBundle() {
         this.bundle = new TreeMap<>();
-        Arrays.stream(GameColor.values()).toList().forEach(color -> bundle.put(color, 0));
+        TokensBundle.getColorsSupported().forEach(color -> bundle.put(color, 0));
     }
 
     public TokensBundle(Map<GameColor, Integer> bundle) {
@@ -16,7 +16,7 @@ public class TokensBundle {
         if (copy.values().stream().anyMatch(value -> value < 0)) {
             throw new IllegalArgumentException("Token counts must be non-negative");
         }
-        Arrays.stream(GameColor.values()).toList().forEach(color -> copy.putIfAbsent(color, 0));
+        TokensBundle.getColorsSupported().forEach(color -> copy.putIfAbsent(color, 0));
         this.bundle = copy;
     }
 
@@ -50,7 +50,7 @@ public class TokensBundle {
         Objects.requireNonNull(other);
 
         int countExceeded = 0;
-        for (GameColor color : GameColor.values()) {
+        for (GameColor color : TokensBundle.getColorsSupported()) {
             if(color == GameColor.YELLOW){
                 continue;
             }
@@ -64,7 +64,7 @@ public class TokensBundle {
     public TokensBundle subtract(TokensBundle other) {
         Objects.requireNonNull(other);
 
-        for (GameColor color : GameColor.values()){
+        for (GameColor color : TokensBundle.getColorsSupported()){
             subtract(color, other.getTokenCount(color));
         }
         return this;
@@ -95,14 +95,12 @@ public class TokensBundle {
     // return a TokensBundle that contains the positive difference between this and other
     public TokensBundle diffPos(TokensBundle other) {
         Objects.requireNonNull(other);
-        System.out.println("diffing " + this + " and " + other);
 
         TokensBundle result = new TokensBundle();
         for (GameColor color : TokensBundle.getColorsSupported()) {
             int count = Math.max(0,this.getTokenCount(color) - other.getTokenCount(color));
             result.addToken(color, count);
         }
-        System.out.println("resulting diff = " + result);
         return result;
     }
 
@@ -121,7 +119,7 @@ public class TokensBundle {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (GameColor color : GameColor.values()) {
+        for (GameColor color : TokensBundle.getColorsSupported()) {
             int count = bundle.get(color);
             if (count > 0) {
                 sb.append(color).append(":").append(count).append(" ");

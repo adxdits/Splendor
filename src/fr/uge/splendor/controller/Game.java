@@ -1,5 +1,6 @@
 package fr.uge.splendor.controller;
 import fr.uge.splendor.model.*;
+import fr.uge.splendor.view.Displayer;
 import fr.uge.splendor.view.TerminalDisplayer;
 import fr.uge.splendor.tools.TerminalTools;
 
@@ -9,14 +10,9 @@ import java.util.stream.Collectors;
 public class Game {
     private final GameSettings gameSettings;
     private final List<Player> players = new ArrayList<>();
-//    private final Map<GameColor, TokenStack> tokenStack = new TreeMap<>();
-//    private final List<CardStack> cardStack;
-//    private final NobleStack nobleStack = new NobleStack();
-//    private final ArrayList<Noble> noblesShow = new ArrayList<>();
-//    private final List<List<Card>> cardsShow = new ArrayList<>();
     private final Board board;
     private int tourNumber = 0;
-    private final TerminalDisplayer displayer = new TerminalDisplayer();
+    private final Displayer displayer = new TerminalDisplayer();
 
     public Game(GameSettings gameSettings) {
         this.gameSettings = gameSettings;
@@ -32,12 +28,11 @@ public class Game {
     public void play() {
         // Boucle de jeu principale
         while (!haveWinner()){
-            int playerIndex = 1;//tourNumber % players.size();
+            int playerIndex = tourNumber % players.size();
             Player currentPlayer = players.get(playerIndex);
             showState(currentPlayer);
 
             allNobleTryToVisitAllPlayer();
-//            refillCardsShowed();
             executeTurn(currentPlayer);
 
             tourNumber++;
@@ -55,12 +50,10 @@ public class Game {
     }
 
     private void askPlayerThrowTokens(Player player) {
-        System.out.println(TerminalTools.askText("Vous avez trop de jetons. Veuillez en jeter"));
         TokensBundle playerToken = player.getTokens();
         while (true){
+            displayer.throwTokens(playerToken);
 
-            displayer.displayPlayerTokens(playerToken, 0);
-            System.out.println(TerminalTools.askText("Choisissez la couleur du jeton à jeter : "));
             int colorIndex = TerminalTools.getSecurisedInput();
             if (colorIndex == -1) {
                 return;
@@ -72,12 +65,12 @@ public class Game {
             GameColor color = TokensBundle.getColorsSupported().get(colorIndex);
             int tokenTakeByColor = playerToken.getTokenCount(color);
             if (tokenTakeByColor <= 0) {
-                System.out.println(TerminalTools.warningText("Pas de jetons disponibles de cette couleur."));
+                displayer.noMoreTokens();
                 continue;
             }
             player.throwToken(new Token(color));
             board.refillTokenStack(color,1);
-            System.out.println(TerminalTools.confirmText("Vous avez jeté le jeton : " + color));
+            displayer.tokenThrow(color);
             break;
 
 
@@ -106,30 +99,8 @@ public class Game {
     private void announceWinner() {
         players.stream()
                 .max(Comparator.comparingInt(Player::getPrestigePoints))
-                .ifPresent(winner -> System.out.println("Le gagnant est " + winner.getName() + " avec " + winner.getPrestigePoints() + " points de prestige !"));
+                .ifPresent(displayer::displayWinner);
     }
-
-//    private void refillCardsShowed(){
-//        for (int i = 0; i < cardsShow.size(); i++) { // we need i for know which level we need
-//            List<Card> cards = cardsShow.get(i);
-//            for (int j = 0; j < cards.size(); j++) {
-//                if (cards.get(j) == null) {
-//                    Card card = cardStack.get(i).takeOne();
-//                    cards.set(j, card);
-//                }
-//            }
-//        }
-//    }
-
-//    private void refillTokenStack(TokensBundle tokens){
-//        for (GameColor color: GameColor.values()) {
-//            int quantity = tokens.getTokenCount(color);
-//            if (quantity > 0) {
-//                tokenStack.get(color).refill(quantity);
-//            }
-//        }
-//
-//    }
 
     private void allNobleTryToVisitAllPlayer(){
         for (Player player : players) {
@@ -179,13 +150,13 @@ public class Game {
 
     private boolean askPlayerReserveCard(Player player) {
         if (!player.canBorrowCard()){
-            System.out.println(TerminalTools.warningText("Vous ne pouvez pas réserver de carte. Vous avez déjà " + gameSettings.borrowedCardsMax() + " cartes réservées."));
+            displayer.cantBorrowCard(gameSettings.borrowedCardsMax());
             return false;
         }
         while (true){
             displayer.displayBoard(board, 0);
+            displayer.askToBorrowCard();
 
-            System.out.println(TerminalTools.askText("Choisissez une carte à réserver : (-1 pour annuler)"));
             int cardIndex = TerminalTools.getSecurisedInput();
             int columnIndex = cardIndex / Board.CARDS_BY_LEVEL; // is it also the level of the card
             int rowIndex = cardIndex % Board.CARDS_BY_LEVEL;
@@ -195,15 +166,13 @@ public class Game {
             }
             Card card = board.peekCard(columnIndex+1,rowIndex);
             if (card == null) {
-                System.out.println(TerminalTools.warningText("Pas de carte disponible à cette position."));
+                displayer.showInvalidChoice();
                 continue;
             }
             player.borrowCard(card);
             board.cardTaken(card);
             player.addTokens(GameColor.YELLOW, 1);
             board.takeToken(GameColor.YELLOW, 1);
-
-            System.out.println(TerminalTools.confirmText("Vous avez réservé la carte : " + card));
             return true;
         }
     }
@@ -214,7 +183,7 @@ public class Game {
 
             int index = displayer.displayBoard(board, 0);
             displayer.displayBorrowedCards(borrowedCards, index);
-            System.out.println(TerminalTools.askText("Choisissez une carte à acheter : (-1 pour annuler)"));
+            displayer.askToBuyCard();
             int cardIndex = TerminalTools.getSecurisedInput();
             if (cardIndex == -1) {
                 return false;
@@ -227,23 +196,20 @@ public class Game {
                 }
                 Card card = borrowedCards.get(borrowedCardIndex);
                 if (card == null) {
-                    System.out.println(TerminalTools.warningText("Pas de carte disponible à cette position."));
+                    displayer.showInvalidChoice();
                     continue;
                 }
                 if (player.canBuyCard(card)) {
                     TokensBundle removedTokens = player.buyCard(card);
-                    System.out.println(TerminalTools.confirmText("Vous avez acheté la carte : " + card));
                     board.refillTokenStack(removedTokens);
                     return true;
                 } else {
-                    System.out.println(TerminalTools.warningText("Vous ne pouvez pas acheter cette carte."));
+                    displayer.cantBuyCard();
                 }
             }
             int columnIndex = cardIndex / Board.CARDS_BY_LEVEL;
             int rowIndex = cardIndex % Board.CARDS_BY_LEVEL;
-            System.out.println(TerminalTools.askText("Vous avez choisi la carte : " + columnIndex + "," + rowIndex));
             if (columnIndex < 0 || columnIndex >= board.getNbOfLevels() || rowIndex < 0) {
-                System.out.println(TerminalTools.warningText("Index de carte invalide." + board.getNbOfLevels()));
                 displayer.showInvalidChoice();
                 continue;
             }
@@ -254,33 +220,30 @@ public class Game {
             }
             if (player.canBuyCard(card)) {
                 TokensBundle removedTokens = player.buyCard(card);
-                System.out.println(TerminalTools.confirmText("Vous avez acheté la carte : " + card));
-                System.out.println(TerminalTools.confirmText("Vous avez payé : " + removedTokens));
                 board.refillTokenStack(removedTokens);
                 board.cardTaken(card);
                 return true;
-            } else {
-                System.out.println(TerminalTools.warningText("Vous ne pouvez pas acheter cette carte."));
             }
+            displayer.cantBuyCard();
         }
 
 
     }
 
     private boolean askPlayerTakeTokens(Player player) {
-        System.out.println(TerminalTools.askText("Choisissez les jetons à prendre : (-1 pour annuler)"));
         TokensBundle tmpTokens = new TokensBundle();
         var listTokenCanBeTaken = TokensBundle.getColorsSupported().stream().filter(color -> color!= GameColor.YELLOW).toList();
         TokensBundle dataStackTokenCount = new TokensBundle(listTokenCanBeTaken.stream().collect(Collectors.toMap(color -> color, board::getTokenCount)));
         while (true){
             displayer.displayStacksTaken(listTokenCanBeTaken,dataStackTokenCount, tmpTokens);
+            displayer.askToTakeTokens();
+
             int tokenTake = tmpTokens.getTotalTokens();
             boolean twoSameColor = listTokenCanBeTaken.stream().mapToInt(tmpTokens::getTokenCount).anyMatch(e->e==2); // tmpTokens.values().stream().anyMatch(v -> v == 2);
             if (tokenTake == 3 || twoSameColor){
                 break;
             }
 
-            System.out.println(TerminalTools.askText("Choisissez l'index de la couleur du jeton :"));
             int colorIndex = TerminalTools.getSecurisedInput();
             if (colorIndex == -1) {
                 return false;
@@ -292,16 +255,16 @@ public class Game {
             GameColor color = listTokenCanBeTaken.get(colorIndex);
             int tokenTakeByColor = tmpTokens.getTokenCount(color);
             if (board.getTokenCount(color) - tokenTakeByColor <= 0) {
-                System.out.println(TerminalTools.warningText("Pas de jetons disponibles de cette couleur."));
+                displayer.noMoreTokens();
                 continue;
             }
             if(tmpTokens.getTokenCount(color) == 1 && tokenTake == 2){
-                System.out.println(TerminalTools.warningText("Vous ne pouvez pas prendre 2 jetons de la même couleur."));
+                displayer.warn2TokensPerColor();
                 continue;
             }
             // Si le joueur essaye de prendre un second jeton alors que la pile est a moins de 4 jetons
             if (tokenTakeByColor == 1 && board.getTokenCount(color) < 4) {
-                System.out.println(TerminalTools.warningText("Vous ne pouvez pas prendre un second jeton de cette couleur."));
+                displayer.warn2TokensImpossibleMove();
                 continue;
             }
             tmpTokens.addToken(color,1);
@@ -313,8 +276,6 @@ public class Game {
             int quantity = tmpTokens.getTokenCount(color);
             board.takeToken(color, quantity);
         });
-
-        System.out.println(TerminalTools.confirmText("Vous avez pris : " + tmpTokens));
         return true;
     }
 
