@@ -22,62 +22,17 @@ public class Game {
         this.gameSettings = gameSettings;
         CardStack.loadCardFromCSV();
         board = new Board(gameSettings);
-//        if(gameSettings.useSimplePlay()){
-//            cardStack = List.of(new CardStack(true));
-//        }else{
-//            cardStack = List.of(new CardStack(1),new CardStack(2),new CardStack(3));
-//        }
         for (int i = 0; i < gameSettings.playerCount(); i++) {
             players.add(new Player(i+1));
         }
-//        prepareBoard();
 
     }
 
-    private int getNoblesToShow(){
-        return players.size()+1;
-    }
-
-//    private void prepareNobles() {
-//        if (gameSettings.useSimplePlay()){
-//            return;
-//        }
-//        int noblesToShow = getNoblesToShow();
-//        for (int i = 0; i < noblesToShow; i++) {
-//            Noble noble = nobleStack.takeOne();
-//            noblesShow.add(noble);
-//        }
-//    }
-//
-//
-//    private void prepareBoard() {
-//        prepareTokens();
-//        prepareCards();
-//        prepareNobles();
-//
-//    }
-//
-//    private void prepareTokens() {
-//        Arrays.stream(GameColor.values()).forEach(color -> tokenStack.put(color, new TokenStack(color, players.size())));
-//    }
-//
-//    private void prepareCards() {
-//        for (CardStack stack : cardStack) {
-//            ArrayList<Card> cards = new ArrayList<>();
-//            for (int i = 0; i < 4; i++) {
-//                if (!stack.isEmpty()) {
-//                    Card card = stack.takeOne();
-//                    cards.add(card);
-//                }
-//            }
-//            cardsShow.add(cards);
-//        }
-//    }
 
     public void play() {
         // Boucle de jeu principale
         while (!haveWinner()){
-            int playerIndex = tourNumber % players.size();
+            int playerIndex = 1;//tourNumber % players.size();
             Player currentPlayer = players.get(playerIndex);
             showState(currentPlayer);
 
@@ -354,6 +309,7 @@ public class Game {
         }
 
         player.addTokens(tmpTokens);
+
         TokensBundle.getColorsSupported().forEach(color -> {
             int quantity = tmpTokens.getTokenCount(color);
             board.takeToken(color, quantity);

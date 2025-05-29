@@ -35,11 +35,8 @@ public class TokensBundle {
 
     public TokensBundle addTokens(TokensBundle other) {
         Objects.requireNonNull(other);
-        for (Map.Entry<GameColor, Integer> entry : other.bundle.entrySet()) {
-            int count = this.bundle.getOrDefault(entry.getKey(), 0) + entry.getValue();
-            if (count < 0) {
-                throw new IllegalArgumentException("Token counts must be non-negative");
-            }
+        for (GameColor color : TokensBundle.getColorsSupported()){
+            this.addToken(color, other.getTokenCount(color));
         }
         return this;
     }

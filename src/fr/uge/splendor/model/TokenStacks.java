@@ -26,7 +26,7 @@ public class TokenStacks {
                 default -> throw new IllegalArgumentException("Invalid number of players: " + nbPlayer);
             }
         }
-        return tokens;
+        return 1;//tokens;
     }
 
     public void refill(GameColor color, int nbToken){
@@ -43,9 +43,7 @@ public class TokenStacks {
         if (stacks.getTokenCount(color) <= 0) {
             throw new IllegalStateException("No tokens left in the stack");
         }
-        System.out.println("Taking one token of color: " + color);
         stacks.subtract(color, 1);
-        System.out.println("Remaining tokens of color " + color + ": " + stacks.getTokenCount(color));
 
         return color;
     }

@@ -21,7 +21,7 @@ public class Player {
     }
 
     public void addTokens(TokensBundle tokens) {
-        tokens.addTokens(tokens);
+        this.tokens.addTokens(tokens);
     }
 
     public boolean canBorrowCard(){
