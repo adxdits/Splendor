@@ -77,7 +77,7 @@ public class TokensBundle {
         }
         int remains = this.getTokenCount(color) - count;
 
-        if (remains > 0){
+        if (remains >= 0){
             this.bundle.put(color, this.getTokenCount(color) - count);
             return this;
         }

@@ -26,7 +26,7 @@ public class TokenStacks {
                 default -> throw new IllegalArgumentException("Invalid number of players: " + nbPlayer);
             }
         }
-        return 1;//tokens;
+        return tokens;
     }
 
     public void refill(GameColor color, int nbToken){
