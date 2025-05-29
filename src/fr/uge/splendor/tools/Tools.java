@@ -2,6 +2,7 @@ package fr.uge.splendor.tools;
 
 import fr.uge.splendor.model.Card;
 import fr.uge.splendor.model.GameColor;
+import fr.uge.splendor.model.TokensBundle;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,12 +47,12 @@ public class Tools {
         int red = parseCSVIntField(parts, INDEX_RED);
         int black = parseCSVIntField(parts, INDEX_BLACK);
 
-        Map<GameColor, Integer> price = new TreeMap<>();
-        price.put(GameColor.WHITE, white);
-        price.put(GameColor.BLUE, blue);
-        price.put(GameColor.GREEN, green);
-        price.put(GameColor.RED, red);
-        price.put(GameColor.BLACK, black);
+        TokensBundle price = new TokensBundle();
+        price.addToken(GameColor.WHITE, white);
+        price.addToken(GameColor.BLUE, blue);
+        price.addToken(GameColor.GREEN, green);
+        price.addToken(GameColor.RED, red);
+        price.addToken(GameColor.BLACK, black);
 
         if (gemColor == null) {
             gemColor = currentColor;
@@ -68,8 +69,6 @@ public class Tools {
 
         int header_size = 2;
         try(var reader = Files.newBufferedReader(path)) {
-
-
             String line;
             GameColor currentColor = null;
             int currentLevel = 0;

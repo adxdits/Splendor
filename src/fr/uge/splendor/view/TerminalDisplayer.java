@@ -4,19 +4,18 @@ import fr.uge.splendor.model.*;
 import fr.uge.splendor.tools.TerminalTools;
 
 import java.util.List;
-import java.util.Map;
 
 public class TerminalDisplayer {
     public TerminalDisplayer(){
     }
 
-    public int displayBoard(List<List<Card>> cards, Integer interactibleKey){
+    public int displayBoard(Board board, Integer interactibleKey){
 
         System.out.println("Cartes disponibles :");
-        for (int i = 0; i < cards.size(); i++) {
+        for (int i = 0; i < board.getNbOfLevels(); i++) {
             System.out.println("Level " + (i + 1) + ":");
-            for (int j = 0; j < cards.get(i).size(); j++) {
-                Card card = cards.get(i).get(j);
+            for (int j = 0; j < Board.CARDS_BY_LEVEL; j++) {
+                Card card = board.peekCard(i+1,j);
                 String content = card != null ? card.toString() : "Vide";
                 if (interactibleKey != null) {
                     System.out.println(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
@@ -30,27 +29,39 @@ public class TerminalDisplayer {
         return interactibleKey == null ? 0 : interactibleKey;
     }
 
-    public void displayTokensStack(List<TokenStack> tokens){
+    public void displayTokensStack(TokensBundle tokens){
         // display inline
         System.out.print("Pile de jetons : ");
-        for (TokenStack tokenStack : tokens) {
-            System.out.print(tokenStack.toString() + " | ");
+        StringBuilder sb = new StringBuilder();
+        for (GameColor color : TokensBundle.getColorsSupported()) {
+            int count = tokens.getTokenCount(color);
+            if (count > 0) {
+                sb.append(color).append(":").append(count).append(" ");
+            }
         }
-        System.out.println();
+        System.out.println(sb);
     }
 
 
 
-    public int displayStacksTaken(List<TokenStack> tokens, Map<GameColor, Integer> takenStacks){
+    public int displayStacksTaken(List<GameColor> colorOrder, TokensBundle tokenStacks, TokensBundle tokensTaken){
         int interactibleKey = 0;
         System.out.println("Jetons disponibles (jeton pris) : ");
-        for (TokenStack tokenStack : tokens) {
-            if (tokenStack.getColor() == GameColor.YELLOW) continue;
-            String content = tokenStack.toString() + " (pris : " + takenStacks.getOrDefault(tokenStack.getColor(),0) + ")";
+        for(GameColor color : colorOrder){
+            int taken = tokensTaken.getTokenCount(color);
+            int available = tokenStacks.getTokenCount(color);
+            String content = color.toString() + available + " (pris : " + taken + ")";
             System.out.println(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
             interactibleKey++;
-
         }
+
+//        for (TokenStack tokenStack : tokens) {
+//            if (tokenStack.getColor() == GameColor.YELLOW) continue;
+//            String content = tokenStack.toString() + " (pris : " + takenStacks.getOrDefault(tokenStack.getColor(),0) + ")";
+//            System.out.println(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
+//            interactibleKey++;
+//
+//        }
         System.out.println();
         return interactibleKey;
     }
@@ -77,12 +88,11 @@ public class TerminalDisplayer {
         }
     }
 
-    public void displayPlayerTokenWithAdvantages(Map<GameColor, Integer> tokens, Map<GameColor, Integer> advantages){
+    public void displayPlayerTokenWithAdvantages(TokensBundle tokens, TokensBundle advantages){
         System.out.println("Jetons possédés (Bonus) :{ ");
-        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
-            GameColor color = entry.getKey();
-            int quantity = entry.getValue();
-            int bonus = advantages.getOrDefault(color, 0);
+        for (GameColor color: TokensBundle.getColorsSupported()) {
+            int bonus = advantages.getTokenCount(color);
+            int quantity = tokens.getTokenCount(color);
             System.out.print(color + ":" + quantity + "(" + bonus + ") ");
         }
         System.out.println("}");
@@ -98,11 +108,10 @@ public class TerminalDisplayer {
         displayPlayerTokenWithAdvantages(player.getTokens(), player.getAdvantages());
     }
 
-    public int displayPlayerTokens(Map<GameColor, Integer> tokens, Integer interactibleKey){
+    public int displayPlayerTokens(TokensBundle tokens, Integer interactibleKey){
         System.out.print("Jetons possédés :{ ");
-        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
-            GameColor color = entry.getKey();
-            int quantity = entry.getValue();
+        for (GameColor color : TokensBundle.getColorsSupported()) {
+            int quantity = tokens.getTokenCount(color);
             String content = color + ":" + quantity;
             if (interactibleKey != null) {
                 System.out.print(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
@@ -112,6 +121,19 @@ public class TerminalDisplayer {
                 System.out.print("\t" + content);
             }
         }
+
+//        for (Map.Entry<GameColor, Integer> entry : tokens.entrySet()) {
+//            GameColor color = entry.getKey();
+//            int quantity = entry.getValue();
+//            String content = color + ":" + quantity;
+//            if (interactibleKey != null) {
+//                System.out.print(TerminalTools.interactiveText("\t" + interactibleKey + " = " + content));
+//                interactibleKey++;
+//            }
+//            else {
+//                System.out.print("\t" + content);
+//            }
+//        }
         System.out.println(" }");
         System.out.println();
 
