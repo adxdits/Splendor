@@ -32,9 +32,9 @@ public class CardStack {
 
     private void initializeCards(int level,boolean useSimpleGame) {
         if (useSimpleGame) {
-            for (GameColor color : GameColor.values()) {
+            for (GameColor color : TokensBundle.getColorsSupported()) {
                 if (color == GameColor.YELLOW) continue;
-                Map<GameColor,Integer> cost = Map.of(color, 3);
+                TokensBundle cost = new TokensBundle(Map.of(color, 3));
                 for (int i = 0; i < 8; i++) {
                     cards.add(new Card(level, color, 3, cost));
                 }

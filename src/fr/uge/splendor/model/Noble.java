@@ -1,11 +1,11 @@
 package fr.uge.splendor.model;
 
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 
 public record Noble(
         int prestigePoints,
-        Map<GameColor, Integer> cost
+        TokensBundle cost
 ) {
 
     public Noble {
@@ -18,9 +18,15 @@ public record Noble(
 
     @Override
     public String toString() {
-        String costString = cost.entrySet().stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue())
-                .reduce("(", (a, b) -> a + " " + b) + " )";
+        StringBuilder costString = new StringBuilder("(");
+        Arrays.stream(GameColor.values()).forEach(color -> {
+            int count = cost.getTokenCount(color);
+            if (count > 0) {
+                costString.append(color).append(":").append(count).append(" ");
+            }
+        });
+        costString.append(")");
+
         return "{ PT:" + prestigePoints + " | Cout:" + costString + " }";
     }
 }

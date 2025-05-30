@@ -1,17 +1,17 @@
 package fr.uge.splendor.model;
 
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 
 public record Card(
         int level,
         GameColor color,
         int prestigePoints,
-        Map<GameColor, Integer> cost
+        TokensBundle cost
 ) {
-
+    public static final int MAX_LEVEL = 3;
     public Card {
-        if (level < 1 || level > 3) {
+        if (level < 1 || level > MAX_LEVEL) {
             throw new IllegalArgumentException("Level must be between 1 and 3");
         }
         if (prestigePoints < 0) {
@@ -24,9 +24,14 @@ public record Card(
 
     @Override
     public String toString() {
-        String costString = cost.entrySet().stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue())
-                .reduce("(", (a, b) -> a + " " + b) + " )";
+        StringBuilder costString = new StringBuilder("(");
+        Arrays.stream(GameColor.values()).forEach(color -> {
+            int count = cost.getTokenCount(color);
+            if (count > 0) {
+                costString.append(color).append(":").append(count).append(" ");
+            }
+        });
+        costString.append(")");
         return "{ Couleur:" + color + " | Points :" + prestigePoints + " | Cout :" + costString + " }";
     }
 }
