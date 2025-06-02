@@ -11,13 +11,13 @@ import java.util.*;
 
 public class Tools {
 
-    public static final  int INDEX_LEVEL = 0;
-    public static final int INDEX_PV = 2;
-    public static final int INDEX_WHITE = 5;
-    public static final int INDEX_BLUE = 6;
-    public static final int INDEX_GREEN = 7;
-    public static final int INDEX_RED = 8;
-    public static final int INDEX_BLACK = 9;
+    private static final  int INDEX_LEVEL = 0;
+    private static final int INDEX_PV = 2;
+    private static final int INDEX_WHITE = 5;
+    private static final int INDEX_BLUE = 6;
+    private static final int INDEX_GREEN = 7;
+    private static final int INDEX_RED = 8;
+    private static final int INDEX_BLACK = 9;
 
     private static int parseIntOrDefault(String str, int defaultValue) {
         try {
