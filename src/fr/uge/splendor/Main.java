@@ -1,10 +1,15 @@
 package fr.uge.splendor;
 
+import com.github.forax.zen.Application;
 import fr.uge.splendor.controller.Game;
 import fr.uge.splendor.controller.GameSettings;
+import fr.uge.splendor.model.UserAction;
 import fr.uge.splendor.tools.TerminalTools;
+import fr.uge.splendor.tools.Tools;
 
+import java.awt.*;
 import java.util.Scanner;
+import java.util.function.ToIntFunction;
 
 public class Main {
 
@@ -28,9 +33,18 @@ public class Main {
     }
 
     public static void main(String[] args) {
+
+
         boolean simplePlay = askSimplePlay();
         int numPlayers = askPlayers();
-        GameSettings settings = new GameSettings(simplePlay,numPlayers);
-        new Game(settings).play();
+        boolean isTerminal = true;
+
+        if(isTerminal){
+            Game.createTerminalGame(numPlayers, simplePlay).play();
+        }else{
+            Application.run(Color.BLACK, context -> {
+                Game.createGraphicalGame(numPlayers, simplePlay,context).play();
+            });
+        }
     }
 }

@@ -1,10 +1,14 @@
 package fr.uge.splendor.controller;
+import com.github.forax.zen.ApplicationContext;
 import fr.uge.splendor.model.*;
 import fr.uge.splendor.view.Displayer;
 import fr.uge.splendor.view.TerminalDisplayer;
 import fr.uge.splendor.tools.TerminalTools;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.ToIntBiFunction;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 public class Game {
@@ -13,15 +17,42 @@ public class Game {
     private final Board board;
     private int tourNumber = 0;
     private final Displayer displayer = new TerminalDisplayer();
+    private ToIntBiFunction<UserAction,ApplicationContext> customisedInput;
+    private ApplicationContext context;
 
-    public Game(GameSettings gameSettings) {
+    private Game(GameSettings gameSettings, ToIntBiFunction<UserAction,ApplicationContext> customisedInput, ApplicationContext context) {
+        Objects.requireNonNull(gameSettings);
+        Objects.requireNonNull(customisedInput);
+        Objects.requireNonNull(customisedInput);
+
+        this.context = context; // can be null for terminal games
         this.gameSettings = gameSettings;
+        this.customisedInput = customisedInput;
         CardStack.loadCardFromCSV();
         board = new Board(gameSettings);
         for (int i = 0; i < gameSettings.playerCount(); i++) {
             players.add(new Player(i+1));
         }
 
+
+    }
+
+    public static Game createTerminalGame(int playerCount, boolean useSimplePlay) {
+        GameSettings gameSettings = new GameSettings(useSimplePlay, playerCount); // define constant and constraints
+        ToIntBiFunction<UserAction,ApplicationContext> customisedInput = (_,_) -> TerminalTools.getSecurisedInput();
+        return new Game(gameSettings, customisedInput, null);
+    }
+
+    public static Game createGraphicalGame(int playerCount, boolean simplePlay, ApplicationContext context) {
+        Objects.requireNonNull(context);
+        GameSettings gameSettings = new GameSettings(simplePlay, playerCount);
+        ToIntBiFunction<UserAction,ApplicationContext> customisedInput = (action,ctx) -> {
+            // return random value -1 to 4 for actions
+            var random = new Random();
+            return random.nextInt(5) - 1; // -1 for no action, 0-4 for actions
+            //return 1; // Placeholder for graphical input handling
+        };
+        return new Game(gameSettings, customisedInput, context);
     }
 
 
@@ -54,7 +85,7 @@ public class Game {
         while (true){
             displayer.throwTokens(playerToken);
 
-            int colorIndex = TerminalTools.getSecurisedInput();
+            int colorIndex = customisedInput.applyAsInt(UserAction.RETURN_TOKENS, context);
             if (colorIndex == -1) {
                 return;
             }
@@ -118,7 +149,7 @@ public class Game {
         // Demander à chaque joueur de choisir une action
         while (true) {
             displayer.displayActions(gameSettings.useSimplePlay());
-            int choice = TerminalTools.getSecurisedInput();
+            int choice = customisedInput.applyAsInt(UserAction.CHOOSE_ACTION, context);
             switch (choice) {
                 case 1 -> {
                     if (!askPlayerTakeTokens(player)){
@@ -157,7 +188,7 @@ public class Game {
             displayer.displayBoard(board, 0);
             displayer.askToBorrowCard();
 
-            int cardIndex = TerminalTools.getSecurisedInput();
+            int cardIndex = customisedInput.applyAsInt(UserAction.BORROW_CARD, context);
             int columnIndex = cardIndex / Board.CARDS_BY_LEVEL; // is it also the level of the card
             int rowIndex = cardIndex % Board.CARDS_BY_LEVEL;
             if (columnIndex < 0 || columnIndex >= board.getNbOfLevels() || rowIndex < 0 ) {
@@ -184,7 +215,7 @@ public class Game {
             int index = displayer.displayBoard(board, 0);
             displayer.displayBorrowedCards(borrowedCards, index);
             displayer.askToBuyCard();
-            int cardIndex = TerminalTools.getSecurisedInput();
+            int cardIndex = customisedInput.applyAsInt(UserAction.BUY_CARD, context);
             if (cardIndex == -1) {
                 return false;
             }
@@ -244,7 +275,7 @@ public class Game {
                 break;
             }
 
-            int colorIndex = TerminalTools.getSecurisedInput();
+            int colorIndex = customisedInput.applyAsInt(UserAction.TAKE_TOKENS, context);
             if (colorIndex == -1) {
                 return false;
             }
